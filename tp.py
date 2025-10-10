@@ -1,16 +1,21 @@
 """
-Autores: un judio, una peruana y un enano rubio :)
+Autores: 
+    Levigurevitz, Nicolas 1245/23 elevege02@gmail.com
+    Parajo Lopez, Juan Manuel 1367/24 juancholinus@gmail.com
+    Guanca, Carla Anabella 1928/21 carguanca@gmail.com
 
 """
 # Importamos bibliotecas
 import pandas as pd
 import duckdb as dd
-carpeta = "/home/charly/Escritorio/ldd/tp/TablasOriginales/"
+
+carpeta = "/home/charly/Escritorio/ldd/tp/tp-laboratorio-de-datos/TablasOriginales/"
+ruta_destino="/home/charly/Escritorio/ldd/tp/tp-laboratorio-de-datos/TablasModelo"
 #%% #===========================================================================
 # Importamos los datasets que vamos a utilizar en este trabajo practico
 #=============================================================================
 # EE  = pd.read_excel(carpeta+"2022_padron_oficial_establecimientos_educativos.xlsx")
-EE  = pd.read_csv('/home/charly/Escritorio/ldd/tp/TablasOriginales/2022_padron_oficial_establecimientos_educativos.csv')
+EE  = pd.read_csv(carpeta+'/2022_padron_oficial_establecimientos_educativos.csv')
 
 print("--------- fue exitosa la carga -----------------")
 #%%
@@ -125,8 +130,7 @@ EE_comun=resultadoEE_comun[['provincia_id','in_departamentos', 'departamento',
 
 print(EE_comun)
 #%%
-ruta_destino="/home/charly/Escritorio/ldd/tp/TablasModelo/EE_comun"
-EE_comun.to_csv(ruta_destino, index=False)
+EE_comun.to_csv( ruta_destino +"/EE_comun", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 #%%
 '''
@@ -182,8 +186,7 @@ print(EP_filtrado)
 #%%
 EP_filtrado.isnull().sum()
 #%%
-ruta_destino="/home/charly/Escritorio/ldd/tp/TablasModelo/EP"
-EP_filtrado.to_csv(ruta_destino, index=False)
+EE_comun.to_csv( ruta_destino +"/EP_filtrado", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 #%%
 codigos = pd.read_csv(carpeta+"actividades_establecimientos.csv")
@@ -321,8 +324,7 @@ poblacion_por_nivel_educativo=poblacion_por_nivel_educativo[['in_departamentos',
                               'primario','secundario','adulto']]
 print(poblacion_por_nivel_educativo)
 #%%
-ruta_destino="/home/charly/Escritorio/ldd/tp/TablasModelo/poblacion_por_nivel_educativo"
-poblacion_por_nivel_educativo.to_csv(ruta_destino, index=False)
+EE_comun.to_csv( ruta_destino +"/poblacion_por_nivel_educativo", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 
 #%% empezamos a hacer las tablas de sql
