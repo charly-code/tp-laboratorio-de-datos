@@ -1,5 +1,6 @@
 """
 Autores: 
+    
     Levigurevitz, Nicolas 1245/23 elevege02@gmail.com
     Parajo Lopez, Juan Manuel 1367/24 juancholinus@gmail.com
     Guanca, Carla Anabella 1928/21 carguanca@gmail.com
@@ -9,20 +10,22 @@ Autores:
 import pandas as pd
 import duckdb as dd
 
+# Ubicacion de los directorios
 carpeta = "/home/charly/Escritorio/ldd/tp/tp-laboratorio-de-datos/TablasOriginales/"
-ruta_destino="/home/charly/Escritorio/ldd/tp/tp-laboratorio-de-datos/TablasModelo"
-#%% #===========================================================================
-# Importamos los datasets que vamos a utilizar en este trabajo practico
-#=============================================================================
-# EE  = pd.read_excel(carpeta+"2022_padron_oficial_establecimientos_educativos.xlsx")
-EE  = pd.read_csv(carpeta+'/2022_padron_oficial_establecimientos_educativos.csv')
+ruta_destino="/home/charly/Escritorio/ldd/tp/tp-laboratorio-de-datos/TablasModelo/"
 
-print("--------- fue exitosa la carga -----------------")
 #%%
+""" ------------------------------------  Inicio limpieza Datos ----------------------"""
+
+#%% 
+EE  = pd.read_csv(carpeta+'/2022_padron_oficial_establecimientos_educativos.csv')
+print("--------- fue exitosa la carga -----------------")
+#%% 
 # Establecimientos Educativos no dice nada sobre que contiene cada columna 
 # Brinda información sobre los establecimientos educativos, su ubicación y ofertas educativas.
 """
-Establecimiento-Localizacion: Nombre de departamento
+
+Establecimiento-Localizacion: Nombre de departamento (la podemos derivar de cuenexo)
 cueanexo: La clave CUEANEXO consta de 9 dígitos (columna 1): 
     2 dígitos: Identifican la jurisdicción (provincia o CABA).
     5 dígitos: Identifican al instituto o establecimiento educativo.
@@ -37,125 +40,48 @@ telefono
 codigo de localidad: (columna 9) si le sacamos los ultimos 3 digitos podriamos joinear con CODIGO AREA de poblacion
 localidad 
 departamento 
-mail
+mail : hay mails que estan vacios 
 modalidad : [Comun, especial, adultos, artistica, hospitalaria, intercultural, encierro]
-            |__ despues por cada modalidad el nivel.(inicial, Nivel inicial - Jardín maternal,
+               |__ despues por cada modalidad el nivel.(inicial, Nivel inicial - Jardín maternal,
                                                      Nivel inicial - Jardín de infantes	Primario,
                                                      Secundario	Secundario - INET)
 )
     
 """
-EE.isnull().sum()
-print(list(EE.columns))
 #%%
-EE_comun=EE[['Jurisdicción', 'Cueanexo','Localidad','Departamento','Nivel inicial - Jardín maternal', 'Nivel inicial - Jardín de infantes', 'Primario', 'Secundario', 'Secundario - INET', 'SNU', 'SNU - INET']]
+ESTABLECIMIENTOS_EDUCATIVOS=EE[['Cueanexo','Jurisdicción','Departamento','Nivel inicial - Jardín maternal', 
+             'Nivel inicial - Jardín de infantes', 'Primario', 'Secundario', 
+             'Secundario - INET', 'SNU', 'SNU - INET']]
 
-print(EE_comun)
-#%%
-codigo_provincia = pd.read_csv(carpeta+"codigo_departamento_provincia.csv")
-'''
-contiene: 
-    
-'provincia_id': int
-'in_departamentos': int
-'departamento': string
-'provincia': string
-'''
-print("--------- fue exitosa la carga -----------------")
-#%%
-# para ver que no haya valores repetido 
-def formatear_codigo(codigo):
+
+def agregarcero(codigo):
     codigo_str = str(codigo)
-    if len(codigo_str) == 4:
+    if len(codigo_str) == 8:
         return '0' + codigo_str
     return codigo_str
 
-codigo_provincia['in_departamentos'] = codigo_provincia['in_departamentos'].apply(formatear_codigo)
-print(codigo_provincia)
-#%%
-print("Valores únicos en provincia:", codigo_provincia['provincia'].unique())
-#%%
-# Lista de vocales y sus versiones sin acento
+ESTABLECIMIENTOS_EDUCATIVOS['Cueanexo'] = ESTABLECIMIENTOS_EDUCATIVOS['Cueanexo'].astype(str)
+ESTABLECIMIENTOS_EDUCATIVOS['Cueanexo'] = ESTABLECIMIENTOS_EDUCATIVOS['Cueanexo'].apply(agregarcero)
+ESTABLECIMIENTOS_EDUCATIVOS['Jurisdicción'] = ESTABLECIMIENTOS_EDUCATIVOS['Jurisdicción'].replace('Ciudad de Buenos Aires', 'CABA')
 acentos = {'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
            'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U'}
 
-# Aplicar la sustitución en la columna 'Palabra'
-EE_comun['Jurisdicción'] = EE_comun['Jurisdicción'].replace('Ciudad de Buenos Aires', 'CABA')
-EE_comun['Departamento'] = EE_comun['Departamento'].replace('1§ DE MAYO', '1 DE MAYO')
-	
-
 for vocal_con_acento, vocal_sin_acento in acentos.items():
-   EE_comun['Jurisdicción'] = EE_comun['Jurisdicción'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
-   EE_comun['Departamento']=EE_comun['Departamento'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
-   codigo_provincia['provincia']=codigo_provincia['provincia'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
-   codigo_provincia['departamento']=codigo_provincia['departamento'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
-codigo_provincia['departamento'] = codigo_provincia['departamento'].replace('DR. MANUEL BELGRANO', 'DOCTOR MANUEL BELGRANO')
-codigo_provincia['departamento'] = codigo_provincia['departamento'].replace('GENERAL JUAN FACUNDO QUIROGA', 'GENERAL JUAN F QUIROGA')
-codigo_provincia['departamento'] = codigo_provincia['departamento'].replace('GENERAL FELIPE VARELA', 'CORONEL FELIPE VARELA')
-codigo_provincia['departamento'] = codigo_provincia['departamento'].replace('CORONEL DE MARINA LEONARDO ROSALES', 'CORONEL DE MARINA L ROSALES')
-codigo_provincia['departamento'] = codigo_provincia['departamento'].replace("O'HIGGINS", 'O HIGGINS')
-codigo_provincia['departamento'] = codigo_provincia['departamento'].replace('MAYOR LUIS J. FONTANA', 'MAYOR LUIS J FONTANA')
-codigo_provincia['departamento'] = codigo_provincia['departamento'].replace('GENERAL GÜEMES', 'GENERAL GUEMES')
-codigo_provincia['departamento'] = codigo_provincia['departamento'].replace('MAYOR LUIS J. FONTANA', 'MAYOR LUIS J FONTANA')
-codigo_provincia['departamento'] = codigo_provincia['departamento'].replace('1° DE MAYO', '1 DE MAYO')
+   ESTABLECIMIENTOS_EDUCATIVOS['Jurisdicción'] = ESTABLECIMIENTOS_EDUCATIVOS['Jurisdicción'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
+   ESTABLECIMIENTOS_EDUCATIVOS['Departamento']=ESTABLECIMIENTOS_EDUCATIVOS['Departamento'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
 
+ESTABLECIMIENTOS_EDUCATIVOS['Jurisdicción'] = ESTABLECIMIENTOS_EDUCATIVOS['Jurisdicción'].str.strip().str.upper()
+ESTABLECIMIENTOS_EDUCATIVOS['Departamento'] = ESTABLECIMIENTOS_EDUCATIVOS['Departamento'].str.strip().str.upper()
 
-#%%
-EE_comun['Jurisdicción'] = EE_comun['Jurisdicción'].str.strip().str.upper()
-EE_comun['Departamento'] = EE_comun['Departamento'].str.strip().str.upper()
-codigo_provincia['provincia'] = codigo_provincia['provincia'].str.strip().str.upper()
-codigo_provincia['departamento'] = codigo_provincia['departamento'].str.strip().str.upper()
+ESTABLECIMIENTOS_EDUCATIVOS.rename(columns={'Jurisdicción':'provincia'}, inplace=True)
+#%% 
 
-
-#%%
-EE_comun.isnull().sum()
-codigo_provincia.isnull().sum()
-#%%
-resultadoEE_comun = EE_comun.merge(
-    codigo_provincia,
-    left_on=['Jurisdicción', 'Departamento'],
-    right_on=['provincia', 'departamento'],
-    how='left'  
-)
-print(resultadoEE_comun.columns)
-resultadoEE_comun.isnull().sum()
-#%%
-filas_nan = resultadoEE_comun[resultadoEE_comun['departamento'].isnull()]
-print(filas_nan)
-#%%
-EE_comun=resultadoEE_comun[['provincia_id','in_departamentos', 'departamento',
-                                   'provincia','Cueanexo','Nivel inicial - Jardín maternal',
-                                   'Nivel inicial - Jardín de infantes', 'Primario', 'Secundario', 
-                                   'Secundario - INET', 'SNU', 'SNU - INET']]
-
-print(EE_comun)
-#%%
-EE_comun.to_csv( ruta_destino +"/EE_comun", index=False)
+ESTABLECIMIENTOS_EDUCATIVOS.to_csv( ruta_destino +"ESTABLECIMIENTOS_EDUCATIVOS.csv", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
-#%%
-'''
-EEporComun=EE[['Nivel inicial - Jardín maternal', 'Nivel inicial - Jardín de infantes',
-'Primario', 'Secundario', 'Secundario - INET', 'SNU', 'SNU - INET']]
-EEporArtistica=EE[['Cueanexo','Secundario.1', 'SNU.1', 'Talleres']]
-EEporEspecial=EE[['Cueanexo','Nivel inicial - Educación temprana',
-'Nivel inicial - Jardín de infantes.1', 'Primario.1', 'Secundario.2',
-'Integración a la modalidad común/ adultos']]
-EEporAdulto=EE[['Cueanexo','Primario.2','Secundario.3', 'Alfabetización', 'Formación Profesional','Formación Profesional - INET']]
-EEporHspitalaria=EE[['Cueanexo','Inicial', 'Primario.3', 'Secundario.4']]
-#%%
-#EEporMODALIDAD_renombrado.isnull().any()
-#raro que me traiga cp vacios y no me salte como null
-#%%
-#ruta_destino = '/home/charly/Escritorio/ldd/tp/TablasModelo/EEporMODALIDAD_renombrado.csv'
-#EEporMODALIDAD_renombrado.to_csv(ruta_destino, index=False)
-#print("---------fue exitosa la creacion del csv -----------------")
-'''
+
 #%%
 EP = pd.read_csv(carpeta+"Datos_por_departamento_actividad_y_sexo.csv")
-EP_codigo = pd.read_csv(carpeta+"codigo_departamento_provincia.csv")
 print("---------fue exitosa la carga -----------------")
-EP.columns
-
 #%%
 # Este dataset contiene la información por departamento de 
 # la cantidad de empleo y establecimientos laborales por departamento según la 
@@ -176,18 +102,46 @@ Empleo: Número decimal (number)Indica la cantidad de puestos de trabajo para el
 Establecimiento: Número decimal (number)Cantidad de establecimientos para los cruces solicitados 
 empresas_exportadoras
 """
-
-'''hay que filtrar por año 2022'''
-list(EP.columns)
-#print(EP[['in_departamentos', 'provincia_id']])
+#%%
 EP_filtrado = EP[['anio','in_departamentos','departamento','provincia','clae6','letra','genero','Empleo','Establecimientos','empresas_exportadoras']]
 EP_filtrado = EP_filtrado[EP_filtrado['anio'] == 2022]
-print(EP_filtrado)
 #%%
-EP_filtrado.isnull().sum()
+ESTABLECIMIENTOS_PRODUCTIVOS = EP[['in_departamentos','departamento','provincia','clae6','letra','genero','Empleo','Establecimientos','empresas_exportadoras']]
+
+
+def formatear_codigo(codigo):
+    codigo_str = str(codigo)
+    if len(codigo_str) == 4:
+        return '0' + codigo_str
+    return codigo_str
+
+ESTABLECIMIENTOS_PRODUCTIVOS['in_departamentos'] = ESTABLECIMIENTOS_PRODUCTIVOS['in_departamentos'].astype(str)
+ESTABLECIMIENTOS_PRODUCTIVOS['in_departamentos'] = ESTABLECIMIENTOS_PRODUCTIVOS['in_departamentos'].apply(formatear_codigo)
+print(ESTABLECIMIENTOS_PRODUCTIVOS)
+
+ESTABLECIMIENTOS_PRODUCTIVOS['in_departamentos'] = ESTABLECIMIENTOS_PRODUCTIVOS['in_departamentos'].replace('Ciudad de Buenos Aires', 'CABA')
+acentos = {'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+           'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U'}
+
+for vocal_con_acento, vocal_sin_acento in acentos.items():
+   ESTABLECIMIENTOS_PRODUCTIVOS['departamento'] = ESTABLECIMIENTOS_PRODUCTIVOS['departamento'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
+   ESTABLECIMIENTOS_PRODUCTIVOS['provincia']=ESTABLECIMIENTOS_PRODUCTIVOS['provincia'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
+
+ESTABLECIMIENTOS_PRODUCTIVOS['departamento'] = ESTABLECIMIENTOS_PRODUCTIVOS['departamento'].str.strip().str.upper()
+ESTABLECIMIENTOS_PRODUCTIVOS['provincia'] = ESTABLECIMIENTOS_PRODUCTIVOS['provincia'].str.strip().str.upper()
+
+def formatear(codigo):
+    codigo_str = str(codigo)
+    if len(codigo_str) == 5:
+        return '0' + codigo_str
+    return codigo_str
+
+ESTABLECIMIENTOS_PRODUCTIVOS['clae6'] = ESTABLECIMIENTOS_PRODUCTIVOS['clae6'].astype(str)
+ESTABLECIMIENTOS_PRODUCTIVOS['clae6'] = ESTABLECIMIENTOS_PRODUCTIVOS['clae6'].apply(formatear)
 #%%
-EE_comun.to_csv( ruta_destino +"/EP_filtrado", index=False)
+ESTABLECIMIENTOS_PRODUCTIVOS.to_csv( ruta_destino +"ESTABLECIMIENTOS_PRODUCTIVOS.csv", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
+
 #%%
 codigos = pd.read_csv(carpeta+"actividades_establecimientos.csv")
 print("---------fue exitosa la carga -----------------")
@@ -212,9 +166,16 @@ niveles de jerarqui ejemplo:
     
 preguntas: CLAE3 = primeros 3 dígitos de CLAE6?
 """
+#%%
+codigos['clae6'] = codigos['clae6'].astype(str)
+codigos['clae6'] = codigos['clae6'].apply(formatear)
+CODIGO=codigos[['clae6','letra', 'clae6_desc', 'clae2_desc', 'letra_desc']]
+#%%
+CODIGO.to_csv( ruta_destino +"CODIGO.csv", index=False)
+print("---------fue exitosa la creacion del csv -----------------")
 
 #%%
-poblacion = pd.read_excel(carpeta+"padron_poblacion.xlsX")
+localidad = pd.read_excel(carpeta+"padron_poblacion.xlsX")
 print("---------fue exitosa la carga -----------------")
 #%%
 """
@@ -225,7 +186,7 @@ Además, se incluye un cuadro según gobierno local para las 23 provincias y
 la Ciudad Autónoma de Buenos Aires y una serie de cuadros de la Región Metropolitana de 
 Buenos Aires, desagregados por comuna y partido, entidad, localidad y zona rural.
 
-codigo postal - localidad/ciudad
+localidad/ciudad: ID DEPARTAMENTO
 edad :  
 casos : cantidad de personas con esa edad
 % : porcentaje 
@@ -239,13 +200,19 @@ rangos etarios educativos:
     secundario : 12 a 18
     adulto : 18 hasta 65 
 """
-poblacion.columns
 
 #%% 
-poblacion_filtrado = poblacion.loc[12:56594, ['Unnamed: 1','Unnamed: 2','Unnamed: 3']]
-print(poblacion_filtrado)
+localidad_filtrado = localidad.loc[12:56594, ['Unnamed: 1','Unnamed: 2','Unnamed: 3']]
+print(localidad_filtrado)
 #%% 
-filas_inicio = poblacion_filtrado.loc[poblacion_filtrado['Unnamed: 2'] == 'Casos']
+filas_inicio_total = localidad_filtrado.loc[localidad_filtrado['Unnamed: 1'] == 'Total']
+indices_inicio = list(filas_inicio_total.index)
+totales = []
+totales = localidad_filtrado.loc[localidad_filtrado['Unnamed: 1'] == 'Total', 'Unnamed: 2'].tolist()
+print(totales)
+
+#%% 
+filas_inicio = localidad_filtrado.loc[localidad_filtrado['Unnamed: 2'] == 'Casos']
 indices_inicio = list(filas_inicio.index)
 indices_inicio_mas_1 = []
 
@@ -255,92 +222,61 @@ for i in indices_inicio:
 print(indices_inicio_mas_1)
 #%% 
 palabra_clave = 'AREA'
-filas_con_palabra = poblacion_filtrado.loc[poblacion_filtrado['Unnamed: 1'].str.contains(palabra_clave, na=False)]
+filas_con_palabra = localidad_filtrado.loc[localidad_filtrado['Unnamed: 1'].str.contains(palabra_clave, na=False)]
 
 lista_areas = filas_con_palabra['Unnamed: 1'].str[-5:].tolist()
 
-print(len(lista_areas))
+print("Cantidad de departamentos de Argentina en nuestra base de datos ", len(lista_areas))
 
 #%% 
-#edades = list(range(0, 66))
 serie_filas = []
-#serie_filas.append(edades)
 index = 0 
 for j in indices_inicio_mas_1:
     i = j + 65  
-    if i <= len(poblacion_filtrado):  
-        casos = poblacion_filtrado.loc[j:i, 'Unnamed: 2'] 
+    if i <= len(localidad_filtrado):  
+        casos = localidad_filtrado.loc[j:i, 'Unnamed: 2'] 
         
-        serie_filas.append([str(lista_areas[index])]+casos.tolist())  
+        serie_filas.append([str(lista_areas[index])]+[str(totales[index])]+casos.tolist())  
         index += 1
     else:
         break
 
-print(serie_filas)
-
-
 #%% 
-claves = ["in_departamentos"] 
+claves = ["in_departamentos","Total"] 
 for edad in range(0, 66) : 
     claves.append(str(edad))
-cant_personas_por_id_departamento = pd.DataFrame(serie_filas, columns= claves)
-print(cant_personas_por_id_departamento)
-#print(claves)
-cant_personas_por_id_departamento.dtypes
-#%%
-print(cant_personas_por_id_departamento)
-#%%
-cant_personas_por_id_departamento['in_departamentos'] = cant_personas_por_id_departamento['in_departamentos'].astype(str)
-codigo_provincia['in_departamentos'] = codigo_provincia['in_departamentos'].astype(str)
+    
+LOCALIDAD = pd.DataFrame(serie_filas, columns= claves)
 
-
-"""
-rangos etarios educativos: 
-    nivel inicial: 0 a 2 años
-    jardin de infantes : 3 a 5 
-    primario : 6 a 12 
-    secundario : 12 a 18
-    adulto : 18 hasta 65 
-"""
-poblacion_por_nivel_educativo = pd.merge(cant_personas_por_id_departamento, codigo_provincia, on='in_departamentos', how='inner')
-columnas_a_sumar=['0','1','2']
-poblacion_por_nivel_educativo['nivel_inicial'] = poblacion_por_nivel_educativo[columnas_a_sumar].sum(axis=1)
-columnas_a_sumar=['3','4','5']
-poblacion_por_nivel_educativo['jardin_de_infantes'] = poblacion_por_nivel_educativo[columnas_a_sumar].sum(axis=1)
-columnas_a_sumar=['6','7','8','9','10','11','12']
-poblacion_por_nivel_educativo['primario'] = poblacion_por_nivel_educativo[columnas_a_sumar].sum(axis=1)
-columnas_a_sumar=['13','14','15','16','17','18']
-poblacion_por_nivel_educativo['secundario'] = poblacion_por_nivel_educativo[columnas_a_sumar].sum(axis=1)
 #%%
-
-claves=[]
-for edad in range(19, 66) : 
-    claves.append(str(edad))
-poblacion_por_nivel_educativo['adulto'] = poblacion_por_nivel_educativo[claves].sum(axis=1)
-
-print(poblacion_por_nivel_educativo.columns)
+print("Cantidad de departamentos de Argentina en nuestra base de datos ", len(LOCALIDAD))
 #%%
-poblacion_por_nivel_educativo=poblacion_por_nivel_educativo[['in_departamentos','departamento','provincia','nivel_inicial','jardin_de_infantes',
-                              'primario','secundario','adulto']]
-print(poblacion_por_nivel_educativo)
-#%%
-EE_comun.to_csv( ruta_destino +"/poblacion_por_nivel_educativo", index=False)
+LOCALIDAD.to_csv( ruta_destino +"LOCALIDAD.csv", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 
-#%% empezamos a hacer las tablas de sql
+#%%
+""" ------------------------------------  Empezamos a hacer las tablas de SQL ----------------------"""
 
 #%%1
-EE_comun.replace(" ",0,inplace=True) #aqui, reemplazamos los contenidos vacíos por 0, ya que habia espacios en blanco, y no nos dejaba hacer la sumatoria
+"""
+Para cada departamento informar la provincia, el nombre del departamento,
+la cantidad de Establecimientos Educativos (EE) de cada nivel educativo,
+considerando solamente la modalidad común, y la cantidad de habitantes con
+edad correspondiente al nivel educativos listado. El orden del reporte debe
+ser alfabético por provincia y dentro de las provincias descendente por
+cantidad de escuelas primarias
+"""
+ESTABLECIMIENTOS_EDUCATIVOS.replace(" ",0,inplace=True) #aqui, reemplazamos los contenidos vacíos por 0, ya que habia espacios en blanco, y no nos dejaba hacer la sumatoria
 
 consultaJARDIN_MAT = """SELECT provincia,departamento, sum(CAST("Nivel Inicial - Jardín maternal" AS INT)) As "Jardín Maternal"
-                        FROM EE_comun
+                        FROM ESTABLECIMIENTOS_EDUCATIVOS
                         GROUP BY provincia,departamento
                         ORDER BY provincia DESC
                         """
 dfJM = dd.sql(consultaJARDIN_MAT).df()
 
 consultaJARDIN_INFANTES = """SELECT provincia, departamento, sum(CAST("Nivel inicial - Jardín de infantes" AS INT)) As "Jardín de infantes" 
-                             FROM EE_comun
+                             FROM ESTABLECIMIENTOS_EDUCATIVOS
                              GROUP BY provincia, departamento
                              ORDER BY provincia DESC"""
                              
@@ -353,7 +289,7 @@ JardinesTotales = """SELECT dfJI.provincia As Provincia, dfJI.departamento As De
 dfJardinesTotales = dd.sql(JardinesTotales).df()
 
 consultaPRIMARIA = """SELECT provincia, departamento, sum(CAST("Primario" As INT)) As "Primario"
-                      FROM EE_comun
+                      FROM ESTABLECIMIENTOS_EDUCATIVOS
                       GROUP BY provincia, departamento
                       ORDER BY provincia DESC"""
                       
@@ -366,7 +302,7 @@ primariosTotales = """SELECT p.provincia As Provincia, p.departamento As Departa
 dfPrimario = dd.sql(primariosTotales).df()
 
 consultaSECUNDARIO = """SELECT provincia, departamento, SUM(CAST("Secundario" As INT)) As "Secundario" 
-                        FROM EE_comun
+                        FROM ESTABLECIMIENTOS_EDUCATIVOS
                         GROUP BY provincia, departamento
                         ORDER BY provincia DESC"""
 dfSec = dd.sql(consultaSECUNDARIO).df()
@@ -384,7 +320,13 @@ consultaTODOUNIDO = """SELECT j.Provincia, j.Depto, j.Jardines, j."Población Ja
 
 dfTodoUnido = dd.sql(consultaTODOUNIDO).df()
 
-#%%2
+#%%
+"""
+Para cada departamento informar la provincia, el nombre del departamento y
+la cantidad de empleados totales en ese departamento, para el año 2022. El
+orden del reporte debe ser alfabético por provincia y, dentro de las provincias,
+descendente por cantidad de empleados
+"""
 consultaEMPLEOS = """SELECT provincia, departamento, sum(CAST("empleo" As INT)) As "Cantidad total de empleados en 2022"
                      FROM EP_filtrado
                      GROUP BY provincia, departamento
@@ -392,14 +334,61 @@ consultaEMPLEOS = """SELECT provincia, departamento, sum(CAST("empleo" As INT)) 
                      """
                      
 cantTotalEmpleadosPorDepartamento = dd.sql(consultaEMPLEOS).df()
+#%%
+"""
+Para cada departamento, indicar provincia, nombre del departamento,
+cantidad de empresas exportadoras que emplean mujeres (en 2022),
+cantidad de EE (de modalidad común) y población total. Ordenar por
+cantidad de EE descendente, cantidad de empresas exportadoras
+descendente, nombre de provincia ascendente y nombre de departamento
+ascendente. No omitir departamentos sin EE o exportadoras con empleo
+femenino.
+"""
+#%%
+"""
+Según los datos de 2022, para cada departamento que tenga una cantidad
+de empleados mayor que el promedio de los puestos de trabajo de los
+departamentos de la misma provincia, indicar: provincia, nombre del
+departamento, los primeros tres dígitos del CLAE6 que más empleos genera,
+(si no tiene 6 dígitos, agregar un 0 a la izquierda) y la cantidad de empleos en
+ese rubro.
+"""
 
-#%%4
 
 consultaITEM4 = """SELECT provincia, departamento, clae6, CASE WHEN clae6.size()"""
                      
+#%%
+""" ------------------------------------  Inicio graficos ----------------------"""
 
-
-
+#%%
+"""
+Mostrar, utilizando herramientas de visualización, la siguiente información:
+i) Cantidad de empleados por provincia, para 2022. Mostrarlos ordenados de
+manera decreciente por dicha cantidad."""
+#%%
+"""
+ii) Graficar la cantidad de establecimientos educativos (EE) de los
+departamentos en función de la población, separando por nivel educativo y
+su correspondiente grupo etario (identificándolos por colores). Se pueden
+basar en la primera consulta SQL para realizar este gráfico.
+"""
+#%%
+"""
+iii) Realizar un boxplot por cada provincia, de la cantidad de EE por cada
+departamento de la provincia. Mostrar todos los boxplots en una misma
+figura, ordenados por la mediana de cada provincia.
+"""
+#%%
+"""
+iv) Relación entre la cantidad de empleados cada mil habitantes (para 2022) y
+de EE cada mil habitantes por departamento.
+"""
+#%%
+"""
+v) Las 5 actividades (CLAE6) con mayor y menor proporción (respectivamente)
+de empleadas mujeres, para 2022. Incluir en el gráfico la proporción
+promedio de empleo femenino.
+"""
 
 
 
