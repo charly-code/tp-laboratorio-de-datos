@@ -138,6 +138,7 @@ def formatear(codigo):
 
 ESTABLECIMIENTOS_PRODUCTIVOS['clae6'] = ESTABLECIMIENTOS_PRODUCTIVOS['clae6'].astype(str)
 ESTABLECIMIENTOS_PRODUCTIVOS['clae6'] = ESTABLECIMIENTOS_PRODUCTIVOS['clae6'].apply(formatear)
+ESTABLECIMIENTOS_EDUCATIVOS.rename(columns={'in_departamentos':'id_departamentos'}, inplace=True)
 #%%
 ESTABLECIMIENTOS_PRODUCTIVOS.to_csv( ruta_destino +"ESTABLECIMIENTOS_PRODUCTIVOS.csv", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
@@ -242,16 +243,47 @@ for j in indices_inicio_mas_1:
         break
 
 #%% 
-claves = ["in_departamentos","Total"] 
+claves = ["in_departamentos","Total_Poblacion"] 
 for edad in range(0, 66) : 
     claves.append(str(edad))
     
-LOCALIDAD = pd.DataFrame(serie_filas, columns= claves)
+ALUMNNOS_POR_DEPARTAMENTO = pd.DataFrame(serie_filas, columns= claves)
+
+ALUMNNOS_POR_DEPARTAMENTO.rename(columns={'in_departamentos':'id_departamentos'}, inplace=True)
 
 #%%
-print("Cantidad de departamentos de Argentina en nuestra base de datos ", len(LOCALIDAD))
+print("Cantidad de departamentos de Argentina en nuestra base de datos ", len(ALUMNNOS_POR_DEPARTAMENTO))
 #%%
-LOCALIDAD.to_csv( ruta_destino +"LOCALIDAD.csv", index=False)
+ALUMNNOS_POR_DEPARTAMENTO['id_departamentos'] = ALUMNNOS_POR_DEPARTAMENTO['id_departamentos'].astype(str)
+
+"""
+rangos etarios educativos: 
+    nivel inicial: 0 a 2 años
+    jardin de infantes : 3 a 5 
+    primario : 6 a 12 
+    secundario : 12 a 18
+    adulto : 18 hasta 65 
+"""
+columnas_a_sumar=['0','1','2']
+ALUMNNOS_POR_DEPARTAMENTO['nivel_inicial'] = ALUMNNOS_POR_DEPARTAMENTO[columnas_a_sumar].sum(axis=1)
+
+columnas_a_sumar=['3','4','5']
+ALUMNNOS_POR_DEPARTAMENTO['jardin_de_infantes'] = ALUMNNOS_POR_DEPARTAMENTO[columnas_a_sumar].sum(axis=1)
+
+columnas_a_sumar=['6','7','8','9','10','11','12']
+ALUMNNOS_POR_DEPARTAMENTO['primario'] = ALUMNNOS_POR_DEPARTAMENTO[columnas_a_sumar].sum(axis=1)
+
+columnas_a_sumar=['13','14','15','16','17','18']
+ALUMNNOS_POR_DEPARTAMENTO['secundario'] = ALUMNNOS_POR_DEPARTAMENTO[columnas_a_sumar].sum(axis=1)
+
+claves=[]
+for edad in range(19, 66) : 
+    claves.append(str(edad))
+ALUMNNOS_POR_DEPARTAMENTO['adulto'] = ALUMNNOS_POR_DEPARTAMENTO[claves].sum(axis=1)
+ALUMNNOS_POR_DEPARTAMENTO= ALUMNNOS_POR_DEPARTAMENTO[['id_departamentos','nivel_inicial','jardin_de_infantes','primario','secundario','Total_Poblacion']]
+print(ALUMNNOS_POR_DEPARTAMENTO)
+#%%
+ALUMNNOS_POR_DEPARTAMENTO.to_csv( ruta_destino +"LOCALIDAD.csv", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 
 #%%
