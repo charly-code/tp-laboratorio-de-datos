@@ -334,7 +334,6 @@ for j in indices_inicio_mas_1:
     else:
         break
 #%% 
-
 print(serie_filas)
 #%% 
 
@@ -349,118 +348,82 @@ for row in serie_filas:
 print(len(serie_filas[0]))
 print(len(serie_filas[1]))
 
-
 #%% 
 claves = ["in_departamentos"] 
-for edad in range(0, 66) : 
+for edad in range(0, 111) : 
     claves.append(str(edad))
     
 cant_personas_por_id_departamento = pd.DataFrame(serie_filas, columns= claves)
 print(cant_personas_por_id_departamento)
 
 cant_personas_por_id_departamento.dtypes
+
 #%%
-print(cant_personas_por_id_departamento)
+print(cant_personas_por_id_departamento.dtypes)
+print(codigo_provincia.dtypes)
+
 #%%
-cant_personas_por_id_departamento['in_departamentos'] = cant_personas_por_id_departamento['in_departamentos'].astype(str)
-codigo_provincia['in_departamentos'] = codigo_provincia['in_departamentos'].astype(str)
+cant_personas_por_id_departamento['in_departamentos']=cant_personas_por_id_departamento['in_departamentos'].astype(float)
+#%%
+CENSO = pd.merge(cant_personas_por_id_departamento,codigo_provincia,on='in_departamentos', how='left')
+#%%
+CENSO['110'] = CENSO['110'].fillna(0)
+#%%
+CENSO=CENSO[['provincia_id','departamento', 'provincia']+ claves]
+#%%-------------------------- empezamos a hacer las tablas de sql ---------------------------------
 
-"""
-rangos etarios educativos: 
-    nivel inicial: 0 a 2 años
-    jardin de infantes : 3 a 5 
-    primario : 6 a 12 
-    secundario : 12 a 18
-    adulto : 18 hasta 65 
-"""
-poblacion_por_nivel_educativo = pd.merge(cant_personas_por_id_departamento, codigo_provincia, on='in_departamentos', how='inner')
-"""
-columnas_a_sumar=['0','1','2']
-poblacion_por_nivel_educativo['nivel_inicial'] = poblacion_por_nivel_educativo[columnas_a_sumar].sum(axis=1)
-columnas_a_sumar=['3','4','5']
-poblacion_por_nivel_educativo['jardin_de_infantes'] = poblacion_por_nivel_educativo[columnas_a_sumar].sum(axis=1)
-columnas_a_sumar=['6','7','8','9','10','11','12']
-poblacion_por_nivel_educativo['primario'] = poblacion_por_nivel_educativo[columnas_a_sumar].sum(axis=1)
-columnas_a_sumar=['13','14','15','16','17','18']
-poblacion_por_nivel_educativo['secundario'] = poblacion_por_nivel_educativo[columnas_a_sumar].sum(axis=1)
-
-claves=[]
-for edad in range(19, 66) : 
-    claves.append(str(edad))
-poblacion_por_nivel_educativo['adulto'] = poblacion_por_nivel_educativo[claves].sum(axis=1)
-
-print(poblacion_por_nivel_educativo.columns)
-"""
-#%%#%% empezamos a hacer las tablas de sql
-#%%1
+# a corregir: unir la tabla de poblacion con ee mediante el cueanexo y a eso unirlo a apdu para poder tener los nombres de los departamentos.
+consultaAPDDEPTO = """
+SELECT DISTINCT apd.id_departamentos, ep.departamento, apd.nivel_inicial, apd.jardin_de_infantes, apd.primario, apd.secundario, apd.Total_Poblacion
+FROM ALUMNNOS_POR_DEPARTAMENTO AS apd
+INNER JOIN ESTABLECIMIENTOS_PRODUCTIVOS AS ep
+    ON apd.id_departamentos=ep.id_departamentos
 """
 
-EE_comun.replace(" ",0,inplace=True) #aqui, reemplazamos los contenidos vacíos por 0, ya que habia espacios en blanco, y no nos dejaba hacer la sumatoria
+ALUMNOS_POR_DEPARTAMENTO_ULTIMO = dd.sql(consultaAPDDEPTO).df()
 
-consultaJARDIN_MAT = """SELECT provincia,departamento, sum(CAST("Nivel Inicial - Jardín maternal" AS INT)) As "Jardín Maternal"
-                        FROM EE_comun
-                        GROUP BY provincia,departamento
-                        ORDER BY provincia DESC
-                        """
-dfJM = dd.sql(consultaJARDIN_MAT).df()
-
-consultaJARDIN_INFANTES = """SELECT provincia, departamento, sum(CAST("Nivel inicial - Jardín de infantes" AS INT)) As "Jardín de infantes" 
-                             FROM EE_comun
-                             GROUP BY provincia, departamento
-                             ORDER BY provincia DESC"""
-                             
-dfJI = dd.sql(consultaJARDIN_INFANTES).df()
-
-JardinesTotales = """SELECT dfJI.provincia As Provincia, dfJI.departamento As Depto, (dfJI."Jardín de infantes" + dfJM."Jardín Maternal") As Jardines, (poblacion_por_nivel_educativo.nivel_inicial + poblacion_por_nivel_educativo.jardin_de_infantes) As "Población Jardín"
-                     FROM dfJI, dfJM, poblacion_por_nivel_educativo
-                     WHERE dfJI.provincia = dfJM.provincia AND Depto = dfJM.departamento AND dfJI.provincia = poblacion_por_nivel_educativo.provincia AND Depto = poblacion_por_nivel_educativo.departamento"""
-                     
-dfJardinesTotales = dd.sql(JardinesTotales).df()
-
-consultaPRIMARIA = """SELECT provincia, departamento, sum(CAST("Primario" As INT)) As "Primario"
-                      FROM EE_comun
-                      GROUP BY provincia, departamento
-                      ORDER BY provincia DESC"""
-                      
-dfPr = dd.sql(consultaPRIMARIA).df()
-
-primariosTotales = """SELECT p.provincia As Provincia, p.departamento As Departamento, d.Primario, p.primario As "Poblacion Primario"
-                      FROM dfPr As d
-                      INNER JOIN poblacion_por_nivel_educativo As p
-                      ON d.provincia=p.provincia AND d.departamento=p.departamento"""
-dfPrimario = dd.sql(primariosTotales).df()
-
-consultaSECUNDARIO = """SELECT provincia, departamento, SUM(CAST("Secundario" As INT)) As "Secundario" 
-                        FROM EE_comun
-                        GROUP BY provincia, departamento
-                        ORDER BY provincia DESC"""
-dfSec = dd.sql(consultaSECUNDARIO).df()
-
-secundariosTotales = """SELECT p.provincia As Provincia, p.departamento As Departamento, d.Secundario, p.Secundario As "Poblacion Secundario" 
-                        FROM dfSec As d
-                        INNER JOIN poblacion_por_nivel_educativo As p
-                        ON d.provincia=p.provincia AND d.departamento=p.departamento"""
-dfSecundario = dd.sql(secundariosTotales).df()
-
-consultaTODOUNIDO = """SELECT j.Provincia, j.Depto, j.Jardines, j."Población Jardín", p.Primario, p."Poblacion Primario", s.Secundario, s."Poblacion Secundario"
-                       FROM dfJardinesTotales As j, dfPrimario As p, dfSecundario As s 
-                       WHERE j.Provincia=s.Provincia AND j.Provincia=p.Provincia AND j.Depto=s.Departamento AND j.Depto=p.Departamento
-                       ORDER BY j.Provincia ASC, p.Primario DESC"""
-
-dfTodoUnido = dd.sql(consultaTODOUNIDO).df()
+cantidadDeColegiosPorNivel = """
+SELECT
+    provincia,
+    departamento, 
+    (sum(CAST("Nivel inicial - Jardín maternal" AS INT))) + (sum(CAST("Nivel inicial - Jardín de infantes" AS INT))) AS Jardín,
+    sum(CAST(Primario AS INT)) AS Primario, sum(CAST(Secundario AS INT)) AS Secundario
+FROM ESTABLECIMIENTOS_EDUCATIVOS    
+GROUP BY provincia, departamento
 """
+
+dfCANT_COLEGIOS_POR_NIVEL = dd.sql(cantidadDeColegiosPorNivel).df()
+
+consultaFINAL = """
+SELECT DISTINCT
+    ccpn.provincia,
+    ccpn.Departamento,
+    ccpn.Jardín AS Jardines,
+    ((apdu.nivel_inicial) + (apdu.jardin_de_infantes)) AS "Poblacion Jardín",
+    ccpn.Primario,
+    apdu.primario AS "Población Primario",
+    ccpn.Secundario,
+    apdu.secundario AS "Población Secundario"
+FROM dfCANT_COLEGIOS_POR_NIVEL AS ccpn, ALUMNOS_POR_DEPARTAMENTO_ULTIMO AS apdu,
+WHERE ccpn.Departamento=apdu.departamento
+ORDER BY ccpn.provincia ASC, ccpn.Primario DESC
+"""
+
+dfFINAL = dd.sql(consultaFINAL).df()
 
 #%%2
+
+consultaEMPLEADOS2022 = """
+SELECT 
+    provincia,
+    departamento,
+    sum(CAST(Empleo AS INT)) AS "Cantidad total de empleados en 2022"
+FROM EP_filtrado
+GROUP BY provincia, departamento
+ORDER BY provincia ASC, "Cantidad total de empleados en 2022" DESC
 """
 
-consultaEMPLEOS = """SELECT provincia, departamento, sum(CAST("empleo" As INT)) As "Cantidad total de empleados en 2022"
-                     FROM EP_filtrado
-                     GROUP BY provincia, departamento
-                     ORDER BY provincia ASC, "Cantidad total de empleados en 2022" DESC
-                     """
-                     
-cantTotalEmpleadosPorDepartamento = dd.sql(consultaEMPLEOS).df()
-"""
+DFconsulta2 = dd.sql(consultaEMPLEADOS2022).df()
 
 
 #%%4
