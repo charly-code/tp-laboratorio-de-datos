@@ -208,6 +208,7 @@ genero: Texto (string)Indica el sexo biológico de los trabajadores de la fila c
 Empleo: Número decimal (number)Indica la cantidad de puestos de trabajo para el nivel de desagregación deseado 
 Establecimiento: Número decimal (number)Cantidad de establecimientos para los cruces solicitados 
 empresas_exportadoras
+
 """
 #%%
 EP_filtrado = EP[['anio','in_departamentos','departamento','provincia','clae6','letra','genero','Empleo','Establecimientos','empresas_exportadoras']]
@@ -216,12 +217,43 @@ EP_filtrado = EP[['in_departamentos','departamento','provincia','clae6','letra',
 
 print(EP_filtrado)
 #%%
+# hay columnas que superan las empresas exportadoras en cantidad a los estableciminetos 
+# la forma que encontramos para recuperar esa informacion es dar vuelta esa fila los valores de esa columna
+inconsistentes = EP_filtrado[EP_filtrado['empresas_exportadoras'] > EP_filtrado['Establecimientos']]
+porcentaje_inconsistentes = len(inconsistentes) / len(EP_filtrado) * 100
+print(len(inconsistentes))
+#%%
+# Crear copias de los arrays
+establecimientos = EP_filtrado['Establecimientos'].values
+eex = EP_filtrado['empresas_exportadoras'].values
+
+est_nuevo = []
+eex_nuevo = []
+
+# Usar zip para iterar sobre ambos arrays
+for e, ex in zip(establecimientos, eex):
+    if ex > e:  # Si empresas_exportadoras > Establecimientos, intercambiar
+        est_nuevo.append(ex)
+        eex_nuevo.append(e)
+    else:
+        est_nuevo.append(e)
+        eex_nuevo.append(ex)
+
+# Asignar los nuevos valores (manteniendo los mismos nombres de columnas)
+EP_filtrado['Establecimientos'] = est_nuevo
+EP_filtrado['empresas_exportadoras'] = eex_nuevo
+#%%
+inconsistentes = EP_filtrado[EP_filtrado['empresas_exportadoras'] > EP_filtrado['Establecimientos']]
+porcentaje_inconsistentes = len(inconsistentes) / len(EP_filtrado) * 100
+print(len(inconsistentes))
+#%%
 CONCURRE = EP[['in_departamentos','anio','clae6','letra','genero']]
 CONCURRE.rename(columns={'in_departamentos': 'id_depto'})
 
 #%%
 ESTABLECIMIENTOS_PRODUCTIVOS=EP[['anio','in_departamentos','departamento','provincia','clae6','letra','genero','Establecimientos','Empleo','empresas_exportadoras']]
 ESTABLECIMIENTOS_PRODUCTIVOS.rename(columns={'in_departamentos': 'id_depto'})
+#%%
 
 #%%
 ESTABLECIMIENTOS_PRODUCTIVOS.to_csv( ruta_destino +"/EP_filtrado", index=False)
