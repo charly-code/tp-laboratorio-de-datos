@@ -411,7 +411,55 @@ CENSO['110'] = CENSO['110'].fillna(0)
 #%%
 CENSO=CENSO[['provincia_id','departamento', 'provincia']+ claves]
 #%%
-CENSO.to_csv( ruta_destino +"/CENSO", index=False)
+# creamos  un dataframe para graficar
+nombres_columnas=['id_departamento','provincia','cant de personas en nivel_inicial',
+                  'cant de personas en jardin_de_infantes','cant de personas en primario',
+                  'cant de personas en secundario','cant de personas en adulto','total poblacion']
+
+CENSO_POR_NIVEL_EDUC = pd.DataFrame( columns=nombres_columnas)
+CENSO_POR_NIVEL_EDUC['id_departamento']=CENSO['in_departamentos']
+CENSO_POR_NIVEL_EDUC['departamento']=CENSO['departamento']
+
+columnas_a_sumar=['0','1','2']
+CENSO_POR_NIVEL_EDUC['cant de personas en nivel_inicial'] = CENSO[columnas_a_sumar].sum(axis=1)
+
+columnas_a_sumar=['3','4','5']
+CENSO_POR_NIVEL_EDUC['cant de personas en jardin_de_infantes'] = CENSO[columnas_a_sumar].sum(axis=1)
+
+columnas_a_sumar=['6','7','8','9','10','11','12']
+CENSO_POR_NIVEL_EDUC['cant de personas en primario'] = CENSO[columnas_a_sumar].sum(axis=1)
+
+columnas_a_sumar=['13','14','15','16','17','18']
+CENSO_POR_NIVEL_EDUC['cant de personas en secundario'] = CENSO[columnas_a_sumar].sum(axis=1)
+#%%
+claves=[]
+for edad in range(19, 111) : 
+    claves.append(str(edad))
+CENSO_POR_NIVEL_EDUC['cant de personas en adulto'] = CENSO[claves].sum(axis=1)
+
+
+claves_totales = [str(edad) for edad in range(111)]
+CENSO_POR_NIVEL_EDUC['total poblacion'] = CENSO[claves_totales].sum(axis=1)
+#%%
+CENSO_POR_NIVEL_EDUC
+#%%
+columnas_sumar = ['cant de personas en nivel_inicial', 
+               'cant de personas en jardin_de_infantes',
+               'cant de personas en primario',
+               'cant de personas en secundario',
+               'total poblacion']
+
+CENSO_POR_NIVEL_EDUC[columnas_sumar] = CENSO_POR_NIVEL_EDUC[columnas_sumar].apply(pd.to_numeric)
+#%%
+CENSO_POR_NIVEL_EDUC = CENSO_POR_NIVEL_EDUC.groupby('departamento').agg({
+    'cant de personas en nivel_inicial': 'sum',
+    'cant de personas en jardin_de_infantes': 'sum',
+    'cant de personas en primario': 'sum',
+    'cant de personas en secundario': 'sum',
+    'total poblacion':'sum',
+}).reset_index()
+#%%
+CENSO_POR_NIVEL_EDUC.to_csv( ruta_destino +"/CENSO_POR_NIVEL_EDUC", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 #%%
 codigo_provincia.columns
@@ -441,7 +489,7 @@ cantidad de escuelas primarias
 # a corregir: unir la tabla de poblacion con ee mediante el cueanexo y a eso unirlo a apdu para poder tener los nombres de los departamentos.
 consultaAPDDEPTO = """
 SELECT DISTINCT apd.id_departamentos, ep.departamento, apd.nivel_inicial, apd.jardin_de_infantes, apd.primario, apd.secundario, apd.Total_Poblacion
-FROM ALUMNNOS_POR_DEPARTAMENTO AS apd
+FROM CENSO_POR_NIVEL_EDUC AS apd
 INNER JOIN ESTABLECIMIENTOS_PRODUCTIVOS AS ep
     ON apd.id_departamentos=ep.id_departamentos
 """
@@ -454,7 +502,7 @@ SELECT
     departamento, 
     (sum(CAST("Nivel inicial - Jardín maternal" AS INT))) + (sum(CAST("Nivel inicial - Jardín de infantes" AS INT))) AS Jardín,
     sum(CAST(Primario AS INT)) AS Primario, sum(CAST(Secundario AS INT)) AS Secundario
-FROM ESTABLECIMIENTOS_EDUCATIVOS    
+FROM CENSO_POR_NIVEL_EDUC    
 GROUP BY provincia, departamento
 """
 
@@ -579,52 +627,6 @@ EE_comun_agrupado = EE_comun.groupby('Jurisdicción').agg({
     'SNU - INET': 'sum',
 }).reset_index()
 
-#%%
-# creamos  un dataframe para graficar
-nombres_columnas=['provincia','cant de personas en nivel_inicial',
-                  'cant de personas en jardin_de_infantes','cant de personas en primario',
-                  'cant de personas en secundario','cant de personas en adulto','total poblacion']
-
-CENSO_POR_NIVEL_EDUC = pd.DataFrame( columns=nombres_columnas)
-
-CENSO_POR_NIVEL_EDUC['departamento']=CENSO['departamento']
-
-columnas_a_sumar=['0','1','2']
-CENSO_POR_NIVEL_EDUC['cant de personas en nivel_inicial'] = CENSO[columnas_a_sumar].sum(axis=1)
-
-columnas_a_sumar=['3','4','5']
-CENSO_POR_NIVEL_EDUC['cant de personas en jardin_de_infantes'] = CENSO[columnas_a_sumar].sum(axis=1)
-
-columnas_a_sumar=['6','7','8','9','10','11','12']
-CENSO_POR_NIVEL_EDUC['cant de personas en primario'] = CENSO[columnas_a_sumar].sum(axis=1)
-
-columnas_a_sumar=['13','14','15','16','17','18']
-CENSO_POR_NIVEL_EDUC['cant de personas en secundario'] = CENSO[columnas_a_sumar].sum(axis=1)
-#%%
-claves=[]
-for edad in range(19, 111) : 
-    claves.append(str(edad))
-CENSO_POR_NIVEL_EDUC['cant de personas en adulto'] = CENSO[claves].sum(axis=1)
-
-
-claves_totales = [str(edad) for edad in range(111)]
-CENSO_POR_NIVEL_EDUC['total poblacion'] = CENSO[claves_totales].sum(axis=1)
-
-#%%
-columnas_sumar = ['cant de personas en nivel_inicial', 
-               'cant de personas en jardin_de_infantes',
-               'cant de personas en primario',
-               'cant de personas en secundario','total poblacion']
-
-CENSO_POR_NIVEL_EDUC[columnas_sumar] = CENSO_POR_NIVEL_EDUC[columnas_sumar].apply(pd.to_numeric)
-
-CENSO_POR_NIVEL_EDUC = CENSO_POR_NIVEL_EDUC.groupby('departamento').agg({
-    'cant de personas en nivel_inicial': 'sum',
-    'cant de personas en jardin_de_infantes': 'sum',
-    'cant de personas en primario': 'sum',
-    'cant de personas en secundario': 'sum',
-    'total poblacion':'sum',
-}).reset_index()
 #%%
 
 G2 = pd.merge(EE_comun_agrupado, CENSO_POR_NIVEL_EDUC,left_on='Jurisdicción',right_on='provincia', how='left')
