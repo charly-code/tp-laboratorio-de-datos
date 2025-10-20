@@ -8,7 +8,11 @@ Autores:
 """
 # Importamos bibliotecas que vamos a utiliza 
 import pandas as pd
+import numpy as np
 import duckdb as dd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 # Ubicacion de los directorios
 carpeta = "/home/charly/Escritorio/ldd/tp/tp-laboratorio-de-datos/TablasOriginales/"
@@ -53,7 +57,9 @@ explorando las columnas del dataset tenemos:
         C. P. : codigo postal (columna 6)
         Código de área: 
         Teléfono:
-        Código de localidad: (columna 9) si le sacamos los ultimos 3 digitos podriamos joinear con CODIGO AREA de poblacion
+        Código de localidad: Los 2 primeros dígitos corresponden al código de la provincia.
+                             Los 3 siguientes corresponden al código del departamento.
+                             Los 3 últimos se refieren a la localidad específica.
         Localidad: 
         Departamento :
         Mail : hay mails que estan vacios : 
@@ -218,7 +224,7 @@ ESTABLECIMIENTOS_PRODUCTIVOS=EP[['anio','in_departamentos','departamento','provi
 ESTABLECIMIENTOS_PRODUCTIVOS.rename(columns={'in_departamentos': 'id_depto'})
 
 #%%
-EE_comun.to_csv( ruta_destino +"/EP_filtrado", index=False)
+ESTABLECIMIENTOS_PRODUCTIVOS.to_csv( ruta_destino +"/EP_filtrado", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 #%%
 actividades = pd.read_csv(carpeta+"actividades_establecimientos.csv")
@@ -227,6 +233,8 @@ print("---------fue exitosa la carga -----------------")
 #%%
 
 ACTIVIDADES = actividades[['clae6','letra', 'clae6_desc','letra_desc']]
+#%%
+ACTIVIDADES.to_csv( ruta_destino +"/ACTIVIDADES", index=False)
 #%%
 """
 clae6 Número entero (integer)Código de actividad a seis dígitos (CLAE6) 
@@ -361,17 +369,43 @@ cant_personas_por_id_departamento.dtypes
 #%%
 print(cant_personas_por_id_departamento.dtypes)
 print(codigo_provincia.dtypes)
-
 #%%
+codigo_provincia['in_departamentos'] = codigo_provincia['in_departamentos'].astype(float)
 cant_personas_por_id_departamento['in_departamentos']=cant_personas_por_id_departamento['in_departamentos'].astype(float)
 #%%
-CENSO = pd.merge(cant_personas_por_id_departamento,codigo_provincia,on='in_departamentos', how='left')
+CENSO = pd.merge(cant_personas_por_id_departamento, codigo_provincia, on='in_departamentos', how='left')
 #%%
 CENSO['110'] = CENSO['110'].fillna(0)
 #%%
 CENSO=CENSO[['provincia_id','departamento', 'provincia']+ claves]
-#%%-------------------------- empezamos a hacer las tablas de sql ---------------------------------
+#%%
+CENSO.to_csv( ruta_destino +"/CENSO", index=False)
+print("---------fue exitosa la creacion del csv -----------------")
+#%%
+codigo_provincia.columns
+#%%
+ACTIVIDADES.columns
+#%%
+ESTABLECIMIENTOS_PRODUCTIVOS.columns
+#%%
+ESTABLECIMIENTOS_EDUCATIVOS.columns
+#%%
+CENSO.columns
+#%%
+""" ------------------------------------  Empezamos a hacer las tablas de SQL ------------------------------------"""
 
+#%%
+"""
+CONSULTA N°1
+
+Para cada departamento informar la provincia, el nombre del departamento,
+la cantidad de Establecimientos Educativos (EE) de cada nivel educativo,
+considerando solamente la modalidad común, y la cantidad de habitantes con
+edad correspondiente al nivel educativos listado. El orden del reporte debe
+ser alfabético por provincia y dentro de las provincias descendente por
+cantidad de escuelas primarias
+"""
+#%%
 # a corregir: unir la tabla de poblacion con ee mediante el cueanexo y a eso unirlo a apdu para poder tener los nombres de los departamentos.
 consultaAPDDEPTO = """
 SELECT DISTINCT apd.id_departamentos, ep.departamento, apd.nivel_inicial, apd.jardin_de_infantes, apd.primario, apd.secundario, apd.Total_Poblacion
@@ -410,8 +444,16 @@ ORDER BY ccpn.provincia ASC, ccpn.Primario DESC
 """
 
 dfFINAL = dd.sql(consultaFINAL).df()
+#%%
+"""
+CONSULTA N°2
 
-#%%2
+Para cada departamento informar la provincia, el nombre del departamento y
+la cantidad de empleados totales en ese departamento, para el año 2022. El
+orden del reporte debe ser alfabético por provincia y, dentro de las provincias,
+descendente por cantidad de empleados
+"""
+#%%
 
 consultaEMPLEADOS2022 = """
 SELECT 
@@ -425,26 +467,245 @@ ORDER BY provincia ASC, "Cantidad total de empleados en 2022" DESC
 
 DFconsulta2 = dd.sql(consultaEMPLEADOS2022).df()
 
+#%%
+"""
+CONSULTA N°3
 
-#%%4
+Para cada departamento, indicar provincia, nombre del departamento,
+cantidad de empresas exportadoras que emplean mujeres (en 2022),
+cantidad de EE (de modalidad común) y población total. Ordenar por
+cantidad de EE descendente, cantidad de empresas exportadoras
+descendente, nombre de provincia ascendente y nombre de departamento
+ascendente. No omitir departamentos sin EE o exportadoras con empleo
+femenino.
+"""
+#%%
+
+"""
+CONSULTA N°4
+
+Según los datos de 2022, para cada departamento que tenga una cantidad
+de empleados mayor que el promedio de los puestos de trabajo de los
+departamentos de la misma provincia, indicar: provincia, nombre del
+departamento, los primeros tres dígitos del CLAE6 que más empleos genera,
+(si no tiene 6 dígitos, agregar un 0 a la izquierda) y la cantidad de empleos en
+ese rubro.
 """
 
-consultaITEM4 = """SELECT provincia, departamento, clae6, CASE WHEN clae6.size()"""
-                     
+consultaITEM4 = """SELECT provincia, departamento, clae6, CASE WHEN clae6.size()
+"""
+#%%
+""" ------------------------------------  Inicio graficos ------------------------------------"""
 
+#%%
+"""
+i) Cantidad de empleados por provincia, para 2022. Mostrarlos ordenados de
+manera decreciente por dicha cantidad.
+
+"""
+ESTABLECIMIENTOS_PRODUCTIVOS_2022 = ESTABLECIMIENTOS_PRODUCTIVOS[ESTABLECIMIENTOS_PRODUCTIVOS['anio'] == 2022]
+empleos_provincia = ESTABLECIMIENTOS_PRODUCTIVOS_2022.groupby('provincia')['Empleo'].sum().sort_values(ascending=True)
+
+plt.figure(figsize=(10, 6))
+
+empleos_provincia.plot(kind='barh')
+plt.title('Empleados por Provincia - 2022')
+plt.xlabel('Cantidad de Empleados')
+
+plt.tight_layout()
+plt.show()
+#%%
+"""
+ii) Graficar la cantidad de establecimientos educativos (EE) de los
+departamentos en función de la población, separando por nivel educativo y
+su correspondiente grupo etario (identificándolos por colores). Se pueden
+basar en la primera consulta SQL para realizar este gráfico.
+
+Sabiendo que : 
+    rangos etarios educativos: 
+        nivel inicial: 0 a 2 años
+        jardin de infantes : 3 a 5 
+        primario : 6 a 12 
+        secundario : 12 a 18
+        adulto : 18 hasta 110 
 """
 
 
+#%%
+columnas_sumar = ['Nivel inicial - Jardín maternal', 'Nivel inicial - Jardín de infantes', 
+                  'Primario', 'Secundario', 'Secundario - INET', 'SNU', 'SNU - INET']
+
+EE_comun[columnas_sumar] = EE_comun[columnas_sumar].apply(pd.to_numeric)
+
+EE_comun_agrupado = EE_comun.groupby('Jurisdicción').agg({
+    'Nivel inicial - Jardín maternal': 'sum',
+    'Nivel inicial - Jardín de infantes': 'sum',
+    'Primario': 'sum',
+    'Secundario': 'sum',
+    'Secundario - INET': 'sum',
+    'SNU': 'sum',
+    'SNU - INET': 'sum',
+}).reset_index()
+
+#%%
+# creamos  un dataframe para graficar
+nombres_columnas=['provincia','cant de personas en nivel_inicial',
+                  'cant de personas en jardin_de_infantes','cant de personas en primario',
+                  'cant de personas en secundario','cant de personas en adulto','total poblacion']
+
+CENSO_POR_NIVEL_EDUC = pd.DataFrame( columns=nombres_columnas)
+
+CENSO_POR_NIVEL_EDUC['departamento']=CENSO['departamento']
+
+columnas_a_sumar=['0','1','2']
+CENSO_POR_NIVEL_EDUC['cant de personas en nivel_inicial'] = CENSO[columnas_a_sumar].sum(axis=1)
+
+columnas_a_sumar=['3','4','5']
+CENSO_POR_NIVEL_EDUC['cant de personas en jardin_de_infantes'] = CENSO[columnas_a_sumar].sum(axis=1)
+
+columnas_a_sumar=['6','7','8','9','10','11','12']
+CENSO_POR_NIVEL_EDUC['cant de personas en primario'] = CENSO[columnas_a_sumar].sum(axis=1)
+
+columnas_a_sumar=['13','14','15','16','17','18']
+CENSO_POR_NIVEL_EDUC['cant de personas en secundario'] = CENSO[columnas_a_sumar].sum(axis=1)
+#%%
+claves=[]
+for edad in range(19, 111) : 
+    claves.append(str(edad))
+CENSO_POR_NIVEL_EDUC['cant de personas en adulto'] = CENSO[claves].sum(axis=1)
 
 
+claves_totales = [str(edad) for edad in range(111)]
+CENSO_POR_NIVEL_EDUC['total poblacion'] = CENSO[claves_totales].sum(axis=1)
+
+#%%
+columnas_sumar = ['cant de personas en nivel_inicial', 
+               'cant de personas en jardin_de_infantes',
+               'cant de personas en primario',
+               'cant de personas en secundario','total poblacion']
+
+CENSO_POR_NIVEL_EDUC[columnas_sumar] = CENSO_POR_NIVEL_EDUC[columnas_sumar].apply(pd.to_numeric)
+
+CENSO_POR_NIVEL_EDUC = CENSO_POR_NIVEL_EDUC.groupby('departamento').agg({
+    'cant de personas en nivel_inicial': 'sum',
+    'cant de personas en jardin_de_infantes': 'sum',
+    'cant de personas en primario': 'sum',
+    'cant de personas en secundario': 'sum',
+    'total poblacion':'sum',
+}).reset_index()
+#%%
+
+G2 = pd.merge(EE_comun_agrupado, CENSO_POR_NIVEL_EDUC,left_on='Jurisdicción',right_on='provincia', how='left')
 
 
+#%%
+"""
+iii) Realizar un boxplot por cada provincia, de la cantidad de EE por cada
+departamento de la provincia. Mostrar todos los boxplots en una misma
+figura, ordenados por la mediana de cada provincia.
+"""
+#%% 
+provincias = EE_comun['Jurisdicción'].unique()
+
+dict_provincias = {}
+
+for provincia in provincias:
+    df_provincia = EE_comun[EE_comun['Jurisdicción'] == provincia]
+    
+    conteo_localidades = df_provincia['Departamento'].value_counts().to_dict()
+    
+    dict_provincias[provincia] = conteo_localidades
 
 
+#%%
+# Extraer los valores y calcular medianas
+province_data = []
+medians = []
 
+for province, departments in dict_provincias.items():
+    values = list(departments.values())
+    province_data.append(values)
+    medians.append(np.median(values))
 
+# Ordenar provincias por mediana
+sorted_indices = np.argsort(medians)
+sorted_provinces = [list(dict_provincias.keys())[i] for i in sorted_indices]
+sorted_data = [province_data[i] for i in sorted_indices]
 
+# Crear el boxplot
+plt.figure(figsize=(14, 8))
+boxplot = plt.boxplot(sorted_data, labels=sorted_provinces, patch_artist=True)
 
+# Personalizar el gráfico
+colors = plt.cm.Set3(np.linspace(0, 1, len(sorted_provinces)))
+for patch, color in zip(boxplot['boxes'], colors):
+    patch.set_facecolor(color)
 
+plt.title('Cantidad de Establecimientos Educativos por Departamento\nOrdenados por Mediana Provincial', 
+          fontsize=14, fontweight='bold')
+plt.xlabel('Provincia', fontsize=12)
+plt.ylabel('Cantidad de EE', fontsize=12)
+plt.xticks(rotation=45)
+plt.grid(True, alpha=0.3)
 
+plt.show()
+#%%
+"""
+iv) Relación entre la cantidad de empleados cada mil habitantes (para 2022) y
+de EE cada mil habitantes por departamento.
+""" 
+cant_ee_por_depto = {}
+for v in dict_provincias.values():
+    cant_ee_por_depto.update(v)
+    
+ESTABLECIMIENTOS_PRODUCTIVOS_2022 = ESTABLECIMIENTOS_PRODUCTIVOS[ESTABLECIMIENTOS_PRODUCTIVOS['anio'] == 2022]
+cant_empleados_por_depto = ESTABLECIMIENTOS_PRODUCTIVOS_2022.groupby('departamento')['Empleo'].sum().sort_values(ascending=True)
 
+total_por_depto = CENSO_POR_NIVEL_EDUC[['departamento','total poblacion']]
+
+#%%
+"""
+v) Las 5 actividades (CLAE6) con mayor y menor proporción (respectivamente)
+de empleadas mujeres, para 2022. Incluir en el gráfico la proporción
+promedio de empleo femenino.
+"""
+
+clae6=ESTABLECIMIENTOS_PRODUCTIVOS_2022['clae6'].unique().tolist()
+
+dicc_clae6 = {}
+for c in clae6:
+      dicc_clae6[c] = {'Mujeres': 0, 'Varones': 0}
+
+#%%
+for _, fila in ESTABLECIMIENTOS_PRODUCTIVOS_2022.iterrows():
+    clae = fila['clae6']
+    genero = fila['genero']
+    empleo = fila['Empleo']
+    
+    if genero == 'Mujeres':
+        dicc_clae6[clae]['Mujeres'] += empleo
+    elif genero == 'Varones':
+        dicc_clae6[clae]['Varones'] += empleo
+#%%
+for clae in dicc_clae6:
+    dicc_clae6[clae]=(dicc_clae6[clae]['Mujeres']/(dicc_clae6[clae]['Mujeres']+dicc_clae6[clae]['Varones']))*100
+        
+#%%
+valores_lista=[]
+valores = dicc_clae6.items()
+for i in valores:
+    valores_lista.append(i[1])
+    valores_lista.sort()
+
+#%%
+def buscar_valor(diccionario, valor_buscado):
+  for clave, valor in diccionario.items():
+    if valor == valor_buscado:
+      return clave
+  
+claves_con_cero = [clave for clave, valor in dicc_clae6.items() if valor == 0.0]
+#%% 
+actividades=[]
+for i in valores_lista[-5:]:
+    actividades.append(buscar_valor(dicc_clae6, i))
+#%%
