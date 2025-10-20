@@ -442,22 +442,7 @@ claves_totales = [str(edad) for edad in range(111)]
 CENSO_POR_NIVEL_EDUC['total poblacion'] = CENSO[claves_totales].sum(axis=1)
 #%%
 CENSO_POR_NIVEL_EDUC
-#%%
-columnas_sumar = ['cant de personas en nivel_inicial', 
-               'cant de personas en jardin_de_infantes',
-               'cant de personas en primario',
-               'cant de personas en secundario',
-               'total poblacion']
 
-CENSO_POR_NIVEL_EDUC[columnas_sumar] = CENSO_POR_NIVEL_EDUC[columnas_sumar].apply(pd.to_numeric)
-#%%
-CENSO_POR_NIVEL_EDUC = CENSO_POR_NIVEL_EDUC.groupby('departamento').agg({
-    'cant de personas en nivel_inicial': 'sum',
-    'cant de personas en jardin_de_infantes': 'sum',
-    'cant de personas en primario': 'sum',
-    'cant de personas en secundario': 'sum',
-    'total poblacion':'sum',
-}).reset_index()
 #%%
 CENSO_POR_NIVEL_EDUC.to_csv( ruta_destino +"/CENSO_POR_NIVEL_EDUC", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
