@@ -417,6 +417,7 @@ nombres_columnas=['id_departamento','provincia','cant de personas en nivel_inici
                   'cant de personas en secundario','cant de personas en adulto','total poblacion']
 
 CENSO_POR_NIVEL_EDUC = pd.DataFrame( columns=nombres_columnas)
+CENSO_POR_NIVEL_EDUC['provincia']=CENSO['provincia']
 CENSO_POR_NIVEL_EDUC['id_departamento']=CENSO['in_departamentos']
 CENSO_POR_NIVEL_EDUC['departamento']=CENSO['departamento']
 
@@ -460,6 +461,9 @@ CENSO.columns
 """ ------------------------------------  Empezamos a hacer las tablas de SQL ------------------------------------"""
 
 #%%
+""" ------------------------------------  Empezamos a hacer las tablas de SQL ------------------------------------"""
+
+#%%
 """
 CONSULTA N°1
 
@@ -471,23 +475,21 @@ ser alfabético por provincia y dentro de las provincias descendente por
 cantidad de escuelas primarias
 """
 #%%
-# a corregir: unir la tabla de poblacion con ee mediante el cueanexo y a eso unirlo a apdu para poder tener los nombres de los departamentos.
-consultaAPDDEPTO = """
-SELECT DISTINCT apd.id_departamentos, ep.departamento, apd.nivel_inicial, apd.jardin_de_infantes, apd.primario, apd.secundario, apd.Total_Poblacion
-FROM CENSO_POR_NIVEL_EDUC AS apd
-INNER JOIN ESTABLECIMIENTOS_PRODUCTIVOS AS ep
-    ON apd.id_departamentos=ep.id_departamentos
-"""
 
-ALUMNOS_POR_DEPARTAMENTO_ULTIMO = dd.sql(consultaAPDDEPTO).df()
+consultaSQL = """SELECT DISTINCT c.in_departamentos AS id_departamentos, c.provincia, cne.departamento, cne."cant de personas en nivel_inicial" AS nivel_inicial, cne."cant de personas en jardin_de_infantes" AS jardin_de_infantes, cne."cant de personas en primario" AS primario, cne."cant de personas en secundario" AS secundario, cne."total poblacion" 
+FROM CENSO_POR_NIVEL_EDUC AS cne
+INNER JOIN CENSO AS c
+ON c.departamento=cne.departamento"""
+
+ALUMNOS_POR_DEPARTAMENTO = dd.sql(consultaSQL).df()
 
 cantidadDeColegiosPorNivel = """
 SELECT
     provincia,
     departamento, 
-    (sum(CAST("Nivel inicial - Jardín maternal" AS INT))) + (sum(CAST("Nivel inicial - Jardín de infantes" AS INT))) AS Jardín,
-    sum(CAST(Primario AS INT)) AS Primario, sum(CAST(Secundario AS INT)) AS Secundario
-FROM CENSO_POR_NIVEL_EDUC    
+    (sum(CAST("nivel_inicial" AS INT))) + (sum(CAST("jardin_de_infantes" AS INT))) AS jardín,
+    sum(CAST(primario AS INT)) AS primario, sum(CAST(secundario AS INT)) AS secundario
+FROM ALUMNOS_POR_DEPARTAMENTO     
 GROUP BY provincia, departamento
 """
 
@@ -496,19 +498,19 @@ dfCANT_COLEGIOS_POR_NIVEL = dd.sql(cantidadDeColegiosPorNivel).df()
 consultaFINAL = """
 SELECT DISTINCT
     ccpn.provincia,
-    ccpn.Departamento,
-    ccpn.Jardín AS Jardines,
-    ((apdu.nivel_inicial) + (apdu.jardin_de_infantes)) AS "Poblacion Jardín",
-    ccpn.Primario,
-    apdu.primario AS "Población Primario",
-    ccpn.Secundario,
-    apdu.secundario AS "Población Secundario"
-FROM dfCANT_COLEGIOS_POR_NIVEL AS ccpn, ALUMNOS_POR_DEPARTAMENTO_ULTIMO AS apdu,
-WHERE ccpn.Departamento=apdu.departamento
-ORDER BY ccpn.provincia ASC, ccpn.Primario DESC
+    apd.departamento,
+    ccpn.jardín AS Jardines,
+    ((apd.nivel_inicial) + (apd.jardin_de_infantes)) AS "Poblacion Jardín",
+    ccpn.primario,
+    apd.primario AS "Población Primario",
+    ccpn.secundario,
+    apd.secundario AS "Población Secundario"
+FROM dfCANT_COLEGIOS_POR_NIVEL AS ccpn, ALUMNOS_POR_DEPARTAMENTO AS apd,
+WHERE ccpn.departamento=apd.departamento
+ORDER BY ccpn.provincia ASC, ccpn.primario DESC
 """
 
-dfFINAL = dd.sql(consultaFINAL).df()
+DFconsulta1 = dd.sql(consultaFINAL).df()
 #%%
 """
 CONSULTA N°2
@@ -545,6 +547,94 @@ ascendente. No omitir departamentos sin EE o exportadoras con empleo
 femenino.
 """
 #%%
+consultaSQL = """
+SELECT DISTINCT
+provincia,
+departamento,
+genero,
+sum(CAST(empresas_exportadoras AS INT)) AS empresas_exportadoras
+FROM EP_filtrado
+GROUP BY provincia, departamento, genero
+"""
+
+cant_emp_exp_por_genero = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT
+provincia,
+departamento,
+empresas_exportadoras AS "Cant Expo Mujeres"
+FROM cant_emp_exp_por_genero
+WHERE genero='Mujeres'
+"""
+
+cant_expo_mujeres = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT 
+p.provincia,
+p.departamento,
+m."Cant Expo Mujeres"
+FROM codigo_provincia AS p
+LEFT OUTER JOIN cant_expo_mujeres AS m
+ON LOWER(p.departamento)=LOWER(m.departamento) AND LOWER(p.provincia)=LOWER(m.provincia)
+"""
+
+cant_expo_mujeres_FINAL = dd.sql(consultaSQL).df()
+
+cant_expo_mujeres_FINAL.fillna(0, inplace=True)
+
+consultaSQL = """
+SELECT DISTINCT
+m.provincia,
+ee.departamento,
+COUNT(*) AS "Cant_EE"
+FROM ESTABLECIMIENTOS_EDUCATIVOS AS ee
+INNER JOIN cant_expo_mujeres AS m
+ON LOWER(ee.departamento)=LOWER(m.departamento)
+GROUP BY m.provincia, ee.departamento
+"""
+
+cant_EE_por_depto = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT 
+p.provincia,
+p.departamento,
+ee.Cant_EE
+FROM codigo_provincia AS p
+LEFT OUTER JOIN cant_EE_por_depto AS ee 
+ON LOWER(p.departamento)=LOWER(ee.departamento) AND LOWER(p.provincia)=LOWER(ee.provincia)
+"""
+
+cant_EE_TODOS = dd.sql(consultaSQL).df()
+
+cant_EE_TODOS.fillna(0, inplace=True) #reemplazo valores nulos por 0
+
+consultaSQL = """
+SELECT DISTINCT 
+provincia,
+departamento,
+"total poblacion" AS "Población"
+FROM ALUMNOS_POR_DEPARTAMENTO
+"""
+
+poblacion_por_departamento = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT
+m.provincia AS Provincia,
+m.departamento AS Departamento,
+m."Cant Expo Mujeres" AS Cant_Expo_Mujeres,
+ee.Cant_EE,
+p.Población
+FROM cant_expo_mujeres_FINAL AS m, cant_EE_TODOS AS ee, poblacion_por_departamento AS p
+WHERE LOWER(m.provincia)=LOWER(ee.provincia) AND LOWER(m.provincia)=LOWER(p.provincia) AND LOWER(ee.provincia)=LOWER(p.provincia) AND LOWER(ee.departamento)=LOWER(p.departamento) AND LOWER(m.departamento)=LOWER(ee.departamento) AND LOWER(m.departamento)=LOWER(p.departamento)
+ORDER BY Cant_EE DESC, Cant_Expo_Mujeres DESC, provincia ASC, departamento ASC
+"""
+
+DFconsulta3 = dd.sql(consultaSQL).df()
+#%%
 
 """
 CONSULTA N°4
@@ -557,8 +647,101 @@ departamento, los primeros tres dígitos del CLAE6 que más empleos genera,
 ese rubro.
 """
 
-consultaITEM4 = """SELECT provincia, departamento, clae6, CASE WHEN clae6.size()
+consultaSQL = """
+SELECT DISTINCT
+provincia,
+departamento,
+sum(CAST(Empleo AS INT)) AS cant_Empleos
+FROM EP_filtrado
+GROUP BY provincia, departamento
 """
+
+cant_empleos_por_departamento = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT
+provincia,
+AVG(Empleo) AS promedio_Empleo
+FROM EP_filtrado
+GROUP BY provincia, departamento
+"""
+
+promedio_empleo_por_provincia = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT
+ced.provincia,
+ced.departamento,
+ced.cant_Empleos
+FROM cant_empleos_por_departamento AS ced
+INNER JOIN promedio_empleo_por_provincia AS pep
+ON ced.provincia=pep.provincia
+WHERE ced.cant_Empleos > pep.promedio_Empleo
+"""
+
+empleos_mayor_al_promedio = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT 
+provincia,
+departamento,
+clae6,
+MAX(Empleo) AS Empleo
+FROM EP_filtrado
+GROUP BY provincia, departamento, clae6
+"""
+
+max_clae6_empleos = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT 
+provincia,
+departamento,
+MAX(Empleo) AS Empleo
+FROM EP_filtrado
+GROUP BY provincia, departamento
+"""
+
+max_empleos = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT 
+c6.provincia,
+e.departamento,
+c6.clae6,
+e.Empleo
+FROM max_clae6_empleos AS c6
+INNER JOIN max_empleos AS e
+ON c6.provincia=e.provincia AND c6.departamento=e.departamento AND c6.Empleo=e.Empleo
+"""
+
+dfPRUEBA4 = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT
+d4.provincia,
+d4.departamento,
+d4.clae6,
+d4.Empleo
+FROM dfPRUEBA4 AS d4
+INNER JOIN empleos_mayor_al_promedio AS e
+ON d4.departamento=e.departamento AND d4.provincia=e.provincia
+"""
+
+dfUNIDO = dd.sql(consultaSQL).df()
+
+consultaSQL = """
+SELECT DISTINCT 
+provincia,
+departamento,
+CASE WHEN LENGTH(CAST(clae6 AS VARCHAR)) = 6 THEN CAST(CAST(clae6/1000 AS INT)AS VARCHAR) ELSE CONCAT('0', CAST(CAST(clae6/1000 AS INT) AS VARCHAR)) END AS clae3,
+Empleo AS "Cant. empleos"
+FROM dfUNIDO
+"""
+
+dfFINALCONSULTA = dd.sql(consultaSQL).df()
+
+#%%
 #%%
 """ ------------------------------------  Inicio graficos ------------------------------------"""
 
@@ -594,28 +777,6 @@ Sabiendo que :
         secundario : 12 a 18
         adulto : 18 hasta 110 
 """
-
-
-#%%
-columnas_sumar = ['Nivel inicial - Jardín maternal', 'Nivel inicial - Jardín de infantes', 
-                  'Primario', 'Secundario', 'Secundario - INET', 'SNU', 'SNU - INET']
-
-EE_comun[columnas_sumar] = EE_comun[columnas_sumar].apply(pd.to_numeric)
-
-EE_comun_agrupado = EE_comun.groupby('Jurisdicción').agg({
-    'Nivel inicial - Jardín maternal': 'sum',
-    'Nivel inicial - Jardín de infantes': 'sum',
-    'Primario': 'sum',
-    'Secundario': 'sum',
-    'Secundario - INET': 'sum',
-    'SNU': 'sum',
-    'SNU - INET': 'sum',
-}).reset_index()
-
-#%%
-
-G2 = pd.merge(EE_comun_agrupado, CENSO_POR_NIVEL_EDUC,left_on='Jurisdicción',right_on='provincia', how='left')
-
 
 #%%
 """
@@ -676,12 +837,80 @@ de EE cada mil habitantes por departamento.
 cant_ee_por_depto = {}
 for v in dict_provincias.values():
     cant_ee_por_depto.update(v)
-    
+#%%    
 ESTABLECIMIENTOS_PRODUCTIVOS_2022 = ESTABLECIMIENTOS_PRODUCTIVOS[ESTABLECIMIENTOS_PRODUCTIVOS['anio'] == 2022]
 cant_empleados_por_depto = ESTABLECIMIENTOS_PRODUCTIVOS_2022.groupby('departamento')['Empleo'].sum().sort_values(ascending=True)
+cant_empleados_df = cant_empleados_por_depto.reset_index()
 
-total_por_depto = CENSO_POR_NIVEL_EDUC[['departamento','total poblacion']]
+#%%
+cant_empleados_df['departamento'] = cant_empleados_df['departamento'].str.strip().str.upper()
 
+for vocal_con_acento, vocal_sin_acento in acentos.items():
+   cant_empleados_df['departamento'] = cant_empleados_df['departamento'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
+
+cant_e_por_depto = dict(zip(cant_empleados_df['departamento'], cant_empleados_df['Empleo']))
+
+#%%
+
+total_por_depto = dict(zip(CENSO_POR_NIVEL_EDUC['departamento'], CENSO_POR_NIVEL_EDUC['total poblacion']))
+
+#%%#
+claves_comunes = set(cant_ee_por_depto.keys()) & set(total_por_depto.keys()) & set(cant_e_por_depto.keys())
+
+diccionario_combinado = {}
+for clave in claves_comunes:
+    diccionario_combinado[clave] = {
+        'empleo': cant_e_por_depto[clave],
+        'poblacion': total_por_depto[clave],
+        'ee': cant_ee_por_depto.get(clave)  # Opcional, si existe
+    }
+#%%#
+for clave in diccionario_combinado:
+    empleo = diccionario_combinado[clave]['empleo']
+    poblacion = diccionario_combinado[clave]['poblacion']
+    ee = diccionario_combinado[clave]['ee']
+    
+    if poblacion and poblacion != 0:
+        diccionario_combinado[clave]['empleo_por_mil'] = (1000 * empleo) / poblacion
+        diccionario_combinado[clave]['ee_por_mil'] = (1000 * ee) / poblacion
+    else:
+        diccionario_combinado[clave]['empleo_por_mil'] = 0
+        diccionario_combinado[clave]['ee_por_mil'] = 0
+#%%#      
+diccionario_combinado_df = pd.DataFrame.from_dict(diccionario_combinado)
+#%%#  
+departamentos = diccionario_combinado_df.columns.tolist()
+empleo_por_mil = diccionario_combinado_df.iloc[3].tolist()
+ee_por_mil = diccionario_combinado_df.iloc[4].tolist()
+
+# Crear DataFrame correctamente
+diccionario_combinado_df2 = pd.DataFrame({
+    'departamento': departamentos,
+    'empleo_por_mil': empleo_por_mil,
+    'ee_por_mil': ee_por_mil
+})
+#%%#  
+# Ordenar por empleo_por_mil para mejor visualización
+df_sorted = diccionario_combinado_df2.sort_values('empleo_por_mil', ascending=True)
+
+# Crear la figura PRIMERO
+plt.figure(figsize=(12, 60))
+
+# Luego crear las barras
+bars = plt.barh(df_sorted['departamento'], df_sorted['empleo_por_mil'], 
+                label='Empleo por mil', alpha=0.7, color='blue')
+
+bars2 = plt.barh(df_sorted['departamento'], df_sorted['ee_por_mil'], 
+                 left=df_sorted['empleo_por_mil'], 
+                 label='EE por mil', alpha=0.7, color='red')
+
+plt.xlabel('Valor por mil habitantes')
+plt.ylabel('Departamentos')
+plt.title('Distribución de Empleo y Establecimientos por mil habitantes por Departamento')
+plt.legend()
+plt.grid(True, alpha=0.3, axis='x')
+plt.tight_layout()
+plt.show()
 #%%
 """
 v) Las 5 actividades (CLAE6) con mayor y menor proporción (respectivamente)
@@ -716,15 +945,75 @@ for i in valores:
     valores_lista.append(i[1])
     valores_lista.sort()
 
+
+promedio = sum(valores_lista) / len(valores_lista)
+print(promedio)
 #%%
 def buscar_valor(diccionario, valor_buscado):
   for clave, valor in diccionario.items():
     if valor == valor_buscado:
       return clave
   
-claves_con_cero = [clave for clave, valor in dicc_clae6.items() if valor == 0.0]
+claves_con_cero_mujeres = [clave for clave, valor in dicc_clae6.items() if valor == 0.0]
+claves_con_cero_mujeres=claves_con_cero_mujeres[-5:]
 #%% 
-actividades=[]
+
+claves_con_mas_mujeres=[]
 for i in valores_lista[-5:]:
-    actividades.append(buscar_valor(dicc_clae6, i))
+    claves_con_mas_mujeres.append(buscar_valor(dicc_clae6, i))
 #%%
+porcentajes=[]
+categorias=claves_con_cero_mujeres+claves_con_mas_mujeres
+for i in categorias:
+    porcentajes.append(dicc_clae6[i])
+
+#%%
+
+# Crear el gráfico de barras
+plt.figure(figsize=(14, 8))
+
+# Definir colores diferentes para mayor y menor
+colores = ['lightcoral'] * 5 + ['lightgreen'] * 5
+
+# Crear las barras
+barras = plt.bar([str(c) for c in categorias], porcentajes, 
+                 color=colores, alpha=0.7, edgecolor='black', linewidth=1.2)
+
+# Añadir línea del promedio
+plt.axhline(y=promedio, color='red', linestyle='--', linewidth=3, 
+            label=f'Promedio general: {promedio:.2f}%')
+
+# Personalizar el gráfico
+plt.title('Las 5 Actividades (CLAE6) con Mayor y Menor Proporción de Empleadas Mujeres (2022)', 
+          fontsize=16, fontweight='bold', pad=20)
+plt.ylabel('Porcentaje de Mujeres (%)', fontsize=14)
+plt.xlabel('Código CLAE6', fontsize=14)
+
+# Añadir valores en las barras
+for barra, porcentaje in zip(barras, porcentajes):
+    plt.text(barra.get_x() + barra.get_width()/2, barra.get_height() + 0.5, 
+             f'{porcentaje:.1f}%', ha='center', va='bottom', fontsize=11, fontweight='bold')
+
+# Mejorar el eje x
+plt.xticks(fontsize=12, rotation=0)
+plt.grid(axis='y', alpha=0.3, linestyle='--')
+
+# Añadir anotaciones para identificar los grupos
+plt.text(2, max(porcentajes) * 0.8, 'MENOR PROPORCIÓN', ha='center', 
+         fontsize=12, fontweight='bold',
+         bbox=dict(boxstyle="round,pad=0.5", facecolor="lightcoral", alpha=0.8))
+plt.text(7, max(porcentajes) * 0.8, 'MAYOR PROPORCIÓN', ha='center', 
+         fontsize=12, fontweight='bold',
+         bbox=dict(boxstyle="round,pad=0.5", facecolor="lightgreen", alpha=0.8))
+
+# Añadir leyenda
+plt.legend(loc='upper right', fontsize=12)
+
+# Ajustar los límites del eje Y para mejor visualización
+plt.ylim(0, max(porcentajes) * 1.1)
+
+# Ajustar layout
+plt.tight_layout()
+
+# Mostrar el gráfico
+plt.show()
