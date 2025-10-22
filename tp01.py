@@ -14,7 +14,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
-# para obtener la ruta actual
+# para obtener la ruta actual en linux
 ruta = os.getcwd()
 
 #%% 
@@ -741,15 +741,18 @@ i) Cantidad de empleados por provincia, para 2022. Mostrarlos ordenados de
 manera decreciente por dicha cantidad.
 
 """
+
 empleos_provincia = ESTABLECIMIENTOS_PRODUCTIVOS.groupby('provincia')['Empleo'].sum().sort_values(ascending=True)
 
 plt.figure(figsize=(10, 6))
-
 empleos_provincia.plot(kind='barh')
 plt.title('Empleados por Provincia - 2022')
 plt.xlabel('Cantidad de Empleados')
 
 plt.tight_layout()
+
+plt.savefig(ruta + '/Graficos/grafico1.png', dpi=300, bbox_inches='tight')
+
 plt.show()
 #%%
 """
@@ -777,7 +780,10 @@ plt.xlabel('Cantidad de Establecimientos Educativos')
 plt.ylabel('Población de ese nivel educativo')
 plt.legend()
 plt.grid(True, alpha=0.3)
+plt.savefig(ruta + '/Graficos/grafico2.png', dpi=300, bbox_inches='tight')
+
 plt.show()
+
 
 #%%
 """
@@ -828,6 +834,7 @@ plt.xlabel('Provincia', fontsize=12)
 plt.ylabel('Cantidad de EE', fontsize=12)
 plt.xticks(rotation=90)
 plt.grid(True, alpha=0.3)
+plt.savefig(ruta + '/Graficos/grafico3.png', dpi=300, bbox_inches='tight')
 
 plt.show()
 #%%
@@ -933,6 +940,8 @@ plt.title('Relación entre empleo y cantidad de EE por cada mil habitantes',font
 plt.ylabel('EE por cada mil habitantes',fontsize=14)
 plt.xlabel('Empleados por cada mil habitantes',fontsize=14)
 plt.grid(True, linestyle='--', alpha=0.5)
+plt.savefig(ruta + '/Graficos/grafico4.png', dpi=300, bbox_inches='tight')
+
 plt.show()
 
 #%%
@@ -1023,5 +1032,6 @@ plt.ylim(0, max(porcentajes) * 1.1)
 
 plt.tight_layout()
 
+plt.savefig(ruta + '/Graficos/grafico5.png', dpi=300, bbox_inches='tight')
+
 plt.show()
-#FIN
