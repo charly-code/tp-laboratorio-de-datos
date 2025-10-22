@@ -12,14 +12,15 @@ import numpy as np
 import duckdb as dd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
 
-# Ubicacion de los directorios
-ruta = "/home/charly/Escritorio/ldd/tp/tp-laboratorio-de-datos/"
+# Obtener la ruta actual
+ruta = os.getcwd()
 
 #%% 
 # El dataset de Establecimientos Educativos no contiene informacion sobre las columnas 
 # Brinda información sobre los establecimientos educativos, su ubicación y ofertas educativas.
-ee  = pd.read_csv(ruta+'TablasOriginales/2022_padron_oficial_establecimientos_educativos.csv')
+ee  = pd.read_csv(ruta+'/TablasOriginales/2022_padron_oficial_establecimientos_educativos.csv')
 print("--------- fue exitosa la carga -----------------")
 #%% 
 #veamos cuales son las columnas de nuestro dataset 
@@ -84,7 +85,7 @@ EE_comun['Jurisdicción'] = EE_comun['Jurisdicción'].replace('Ciudad de Buenos 
 # https://datos.produccion.gob.ar/dataset/distribucion-geografica-de-los-establecimientos-productivos/archivo/16f0dfc2-a9ff-4696-b2e5-79831c5c0ec4
 # llamado diccionario de departamentos.csv
 # en el mismo tenemos informacion que nos ayuda a conectar de mejor manera los dataset que nos dan en la catedra
-codigo_provincia = pd.read_csv(ruta+"TablasOriginales/codigo_departamento_provincia.csv")
+codigo_provincia = pd.read_csv(ruta+"/TablasOriginales/codigo_departamento_provincia.csv")
 '''
 contiene: 
     
@@ -172,14 +173,14 @@ ESTABLECIMIENTOS_EDUCATIVOS=resultadoEE_comun[['Cueanexo', 'C. P.','in_departame
 
 #%%
 # creamos el csv 
-ESTABLECIMIENTOS_EDUCATIVOS.to_csv( ruta +"TablasModelo/ESTABLECIMIENTOS_EDUCATIVOS.csv", index=False)
+ESTABLECIMIENTOS_EDUCATIVOS.to_csv( ruta +"/TablasModelo/ESTABLECIMIENTOS_EDUCATIVOS.csv", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 #%%
 # ESTABLECIMIENTOS PRODUCTIVOS 
 # Este dataset contiene la información por departamento de 
 # la cantidad de empleo y establecimientos laborales por departamento según la 
 # actividad realizada y la cantidad de empleados según su sexo
-EP = pd.read_csv(ruta+"TablasOriginales/Datos_por_departamento_actividad_y_sexo.csv")
+EP = pd.read_csv(ruta+"/TablasOriginales/Datos_por_departamento_actividad_y_sexo.csv")
 print("---------fue exitosa la carga -----------------")
 
 """
@@ -244,7 +245,7 @@ ESTABLECIMIENTOS_PRODUCTIVOS=EP[['anio','in_departamentos','departamento','provi
 ESTABLECIMIENTOS_PRODUCTIVOS.rename(columns={'in_departamentos': 'id_depto'})
 
 #%%
-ESTABLECIMIENTOS_PRODUCTIVOS.to_csv( ruta +"TablasModelo/ESTABLECIMIENTOS_PRODUCTIVOS.csv", index=False)
+ESTABLECIMIENTOS_PRODUCTIVOS.to_csv( ruta +"/TablasModelo/ESTABLECIMIENTOS_PRODUCTIVOS.csv", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 #%%
 # Actividades
@@ -270,16 +271,16 @@ niveles de jerarqui ejemplo:
     
 preguntas: CLAE3 = primeros 3 dígitos de CLAE6?
 """
-actividades = pd.read_csv(ruta+"TablasOriginales/actividades_establecimientos.csv")
+actividades = pd.read_csv(ruta+"/TablasOriginales/actividades_establecimientos.csv")
 print(actividades.columns )
 print("---------fue exitosa la carga -----------------")
 #%%
 ACTIVIDADES = actividades[['clae6','letra', 'clae6_desc','letra_desc']]
 #%%
-ACTIVIDADES.to_csv( ruta +"TablasModelo/ACTIVIDADES.csv", index=False)
+ACTIVIDADES.to_csv( ruta +"/TablasModelo/ACTIVIDADES.csv", index=False)
 
 #%%
-LOCALIDAD = pd.read_excel(ruta+"TablasOriginales/padron_poblacion.xlsX")
+LOCALIDAD = pd.read_excel(ruta+"/TablasOriginales/padron_poblacion.xlsX")
 print("---------fue exitosa la carga -----------------")
 
 """
@@ -441,7 +442,7 @@ CENSO_POR_NIVEL_EDUC=CENSO_POR_NIVEL_EDUC[['id_departamento','departamento', 'pr
        'cant de personas en adulto', 'total poblacion']]
 
 #%%
-CENSO_POR_NIVEL_EDUC.to_csv( ruta +"TablasModelo/CENSO_POR_NIVEL_EDUC.csv", index=False)
+CENSO_POR_NIVEL_EDUC.to_csv( ruta +"/TablasModelo/CENSO_POR_NIVEL_EDUC.csv", index=False)
 print("---------fue exitosa la creacion del csv -----------------")
 
 #%%
@@ -497,7 +498,7 @@ ORDER BY a.provincia ASC, c.primario DESC
 
 DFconsulta1 = dd.sql(consultaSQL).df()
 #%%
-DFconsulta1.to_csv( ruta +"MaterialComplementario/SQLconsulta1.csv", index=False)
+DFconsulta1.to_csv( ruta +"/MaterialComplementario/SQLconsulta1.csv", index=False)
 #%%
 """
 CONSULTA N°2
@@ -522,7 +523,7 @@ ORDER BY provincia ASC, "Cantidad total de empleados en 2022" DESC
 
 DFconsulta2 = dd.sql(consultaEMPLEADOS2022).df()
 #%%
-DFconsulta1.to_csv( ruta +"MaterialComplementario/SQLconsulta2.csv", index=False)
+DFconsulta1.to_csv( ruta +"/MaterialComplementario/SQLconsulta2.csv", index=False)
 #%%
 """
 CONSULTA N°3
@@ -625,7 +626,7 @@ ORDER BY Cant_EE DESC, Cant_Expo_Mujeres DESC, provincia ASC, departamento ASC
 DFconsulta3 = dd.sql(consultaSQL).df()
 #%%
 
-DFconsulta3.to_csv( ruta +"MaterialComplementario/SQLconsulta3.csv", index=False)
+DFconsulta3.to_csv( ruta +"/MaterialComplementario/SQLconsulta3.csv", index=False)
 
 #%%
 
@@ -734,7 +735,7 @@ FROM dfUNIDO
 
 dfFINALCONSULTA = dd.sql(consultaSQL).df()
 #%%
-dfFINALCONSULTA.to_csv( ruta +"MaterialComplementario/SQLconsulta4.csv", index=False)
+dfFINALCONSULTA.to_csv( ruta +"/MaterialComplementario/SQLconsulta4.csv", index=False)
 #%%
 """ ------------------------------------  Inicio graficos ------------------------------------"""
 
