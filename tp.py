@@ -237,11 +237,7 @@ inconsistentes = EP_filtrado[EP_filtrado['empresas_exportadoras'] > EP_filtrado[
 porcentaje_inconsistentes = len(inconsistentes) / len(EP_filtrado) * 100
 print(len(inconsistentes))
 #%%
-CONCURRE = EP[['in_departamentos','anio','clae6','letra','genero']]
-CONCURRE.rename(columns={'in_departamentos': 'id_depto'})
-
-#%%
-ESTABLECIMIENTOS_PRODUCTIVOS=EP[['anio','in_departamentos','departamento','provincia','clae6','letra','genero','Establecimientos','Empleo','empresas_exportadoras']]
+ESTABLECIMIENTOS_PRODUCTIVOS=EP_filtrado[['in_departamentos','departamento','provincia','clae6','letra','genero','Establecimientos','Empleo','empresas_exportadoras']]
 ESTABLECIMIENTOS_PRODUCTIVOS.rename(columns={'in_departamentos': 'id_depto'})
 
 #%%
@@ -745,8 +741,7 @@ i) Cantidad de empleados por provincia, para 2022. Mostrarlos ordenados de
 manera decreciente por dicha cantidad.
 
 """
-ESTABLECIMIENTOS_PRODUCTIVOS_2022 = ESTABLECIMIENTOS_PRODUCTIVOS[ESTABLECIMIENTOS_PRODUCTIVOS['anio'] == 2022]
-empleos_provincia = ESTABLECIMIENTOS_PRODUCTIVOS_2022.groupby('provincia')['Empleo'].sum().sort_values(ascending=True)
+empleos_provincia = ESTABLECIMIENTOS_PRODUCTIVOS.groupby('provincia')['Empleo'].sum().sort_values(ascending=True)
 
 plt.figure(figsize=(10, 6))
 
@@ -844,8 +839,7 @@ cant_ee_por_depto = {}
 for v in dict_provincias.values():
     cant_ee_por_depto.update(v)
 
-ESTABLECIMIENTOS_PRODUCTIVOS_2022 = ESTABLECIMIENTOS_PRODUCTIVOS[ESTABLECIMIENTOS_PRODUCTIVOS['anio'] == 2022]
-cant_empleados_por_depto = ESTABLECIMIENTOS_PRODUCTIVOS_2022.groupby('departamento')['Empleo'].sum().sort_values(ascending=True)
+cant_empleados_por_depto = ESTABLECIMIENTOS_PRODUCTIVOS.groupby('departamento')['Empleo'].sum().sort_values(ascending=True)
 cant_empleados_df = cant_empleados_por_depto.reset_index()
 
 cant_empleados_df['departamento'] = cant_empleados_df['departamento'].str.strip().str.upper()
@@ -923,13 +917,13 @@ de empleadas mujeres, para 2022. Incluir en el gráfico la proporción
 promedio de empleo femenino.
 """
 
-clae6=ESTABLECIMIENTOS_PRODUCTIVOS_2022['clae6'].unique().tolist()
+clae6=ESTABLECIMIENTOS_PRODUCTIVOS['clae6'].unique().tolist()
 
 dicc_clae6 = {}
 for c in clae6:
       dicc_clae6[c] = {'Mujeres': 0, 'Varones': 0}
 
-for _, fila in ESTABLECIMIENTOS_PRODUCTIVOS_2022.iterrows():
+for _, fila in ESTABLECIMIENTOS_PRODUCTIVOS.iterrows():
     clae = fila['clae6']
     genero = fila['genero']
     empleo = fila['Empleo']
