@@ -1,0 +1,534 @@
+provincia,departamento,clae3,Cant. empleos
+Tierra Del Fuego,Ushuaia,264,1774
+Buenos Aires,Necochea,851,810
+Buenos Aires,Luján,851,976
+Buenos Aires,Salliqueló,461,97
+Buenos Aires,Trenque Lauquen,015,580
+Tucuman,Graneros,421,66
+Tucuman,Monteros,107,876
+Buenos Aires,Ramallo,241,3453
+Cordoba,Marcos Juárez,011,1354
+Rio Negro,Conesa,014,61
+Mendoza,Maipú,110,3016
+Chubut,Gastre,073,22
+Buenos Aires,Avellaneda,851,2577
+Mendoza,Las Heras,471,2246
+San Juan,Santa Lucía,463,233
+Corrientes,San Cosme,429,175
+Cordoba,Sobremonte,203,53
+Tierra Del Fuego,Tolhuin,022,88
+Chubut,Paso de Indios,014,21
+La Pampa,Quemú Quemú,014,99
+Formosa,Pirané,492,239
+Santa Fe,San Justo,105,368
+Santa Fe,Garay,851,152
+Buenos Aires,Berisso,429,612
+Santiago Del Estero,Río Hondo,551,295
+La Pampa,Hucal,101,122
+Jujuy,Valle Grande,012,14
+Chaco,O'Higgins,012,59
+La Pampa,Caleu Caleu,101,234
+Buenos Aires,Coronel de Marina Leonardo Rosales,851,277
+Buenos Aires,Maipú,014,153
+Buenos Aires,Rauch,014,294
+La Rioja,Arauco,011,319
+La Rioja,General San Martín,477,3
+Santiago Del Estero,Capital,851,2197
+Buenos Aires,Rivadavia,014,232
+Corrientes,San Roque,014,114
+Santiago Del Estero,Moreno,011,177
+La Rioja,Sanagasta,240,21
+Cordoba,Pocho,551,6
+Mendoza,Rivadavia,012,1213
+Buenos Aires,Daireaux,014,301
+Corrientes,Mburucuyá,471,45
+Santiago Del Estero,Quebrachos,012,18
+San Juan,Capital,410,2285
+San Luis,Chacabuco,222,281
+Buenos Aires,Villa Gesell,851,308
+Cordoba,Santa María,293,876
+Buenos Aires,Benito Juárez,014,348
+Misiones,Libertador General San Martín,161,539
+Santiago Del Estero,Robles,101,354
+Buenos Aires,Carlos Casares,461,542
+Chubut,Biedma,102,2022
+Misiones,Capital,410,3216
+Cordoba,Río Seco,014,136
+Misiones,Leandro N. Alem,120,396
+San Juan,Valle Fértil,013,18
+Formosa,Patiño,014,204
+San Juan,Chimbas,410,853
+Neuquen,Picunches,014,29
+Misiones,San Ignacio,013,745
+Jujuy,Santa Catalina,440,22
+Buenos Aires,Navarro,101,136
+Misiones,Concepción,013,352
+Catamarca,Belén,851,106
+Buenos Aires,Hipólito Yrigoyen,851,92
+Buenos Aires,Olavarría,851,893
+Salta,San Carlos,014,11
+Catamarca,Tinogasta,073,109
+Santa Fe,Caseros,461,878
+Jujuy,Humahuaca,073,219
+Buenos Aires,Tres Lomas,014,109
+Chaco,Independencia,014,101
+San Luis,Coronel Pringles,869,303
+La Pampa,Guatraché,463,52
+Rio Negro,El Cuy,012,338
+Corrientes,Berón de Astrada,106,37
+Buenos Aires,Puán,461,166
+Corrientes,Concepción,161,229
+Buenos Aires,Merlo,851,2724
+Formosa,Pilcomayo,851,196
+Catamarca,El Alto,239,230
+Buenos Aires,Laprida,014,186
+Salta,La Candelaria,011,71
+Buenos Aires,Baradero,293,506
+Buenos Aires,General Pinto,014,192
+San Juan,Jáchal,073,670
+Buenos Aires,Mar Chiquita,014,258
+Buenos Aires,Suipacha,105,142
+San Juan,Albardón,239,340
+Buenos Aires,Adolfo Alsina,461,132
+Santiago Del Estero,Silípica,410,147
+Buenos Aires,Zárate,291,7300
+Cordoba,Totoral,222,320
+Santiago Del Estero,Salavina,421,25
+San Juan,Sarmiento,239,431
+Cordoba,Río Cuarto,851,1131
+Salta,Santa Victoria,472,2
+CABA,Comuna 6,851,2288
+Cordoba,Río Primero,011,409
+Buenos Aires,9 de Julio,851,276
+Catamarca,Andalgalá,073,181
+Corrientes,Goya,014,472
+Mendoza,Lavalle,463,589
+Salta,Anta,011,1538
+Rio Negro,Avellaneda,012,1320
+Buenos Aires,Azul,101,680
+Tucuman,Yerba Buena,016,3634
+Tucuman,Juan Bautista Alberdi,016,425
+Santiago Del Estero,Copo,852,62
+CABA,Comuna 12,801,3461
+Buenos Aires,Malvinas Argentinas,851,2510
+Santiago Del Estero,Quebrachos,463,18
+Mendoza,San Rafael,110,756
+Entre Rios,Diamante,853,677
+Buenos Aires,General Paz,851,84
+Buenos Aires,Lezama,104,99
+Buenos Aires,Saladillo,014,233
+San Luis,Juan Martín de Pueyrredón,851,1740
+Chaco,Quitilipi,851,128
+Santa Fe,Vera,014,321
+La Pampa,Limay Mahuida,332,13
+Buenos Aires,José C. Paz,851,1458
+Buenos Aires,San Andrés de Giles,101,476
+Cordoba,San Justo,107,1521
+La Pampa,Realicó,014,125
+Salta,Cachi,110,52
+Formosa,Matacos,410,45
+Buenos Aires,Quilmes,851,5380
+Buenos Aires,San Fernando,221,1983
+La Pampa,Trenel,101,148
+Tucuman,Capital,016,13453
+CABA,Comuna 2,950,4550
+La Rioja,Independencia,421,20
+Mendoza,Luján de Cuyo,110,2344
+Santiago Del Estero,Sarmiento,108,70
+Entre Rios,Uruguay,101,2529
+San Luis,General Pedernera,241,841
+Chaco,Sargento Cabral,014,58
+Rio Negro,9 de Julio,410,20
+Catamarca,Antofagasta de la Sierra,090,447
+Buenos Aires,Vicente López,801,10249
+Santa Fe,San Cristóbal,015,503
+Neuquen,Ñorquín,931,79
+Buenos Aires,Tres de Febrero,851,2535
+Cordoba,Tercero Arriba,011,727
+Buenos Aires,Marcos Paz,101,466
+Entre Rios,Feliciano,014,97
+Neuquen,Picún Leufú,015,13
+Buenos Aires,Coronel Dorrego,011,182
+Buenos Aires,Pellegrini,014,74
+Buenos Aires,Guaminí,014,141
+San Juan,25 de Mayo,012,316
+Neuquen,Añelo,422,854
+La Pampa,Capital,410,1100
+Corrientes,Saladas,014,169
+Santiago Del Estero,Aguirre,855,23
+Corrientes,Lavalle,011,247
+Neuquen,Loncopué,931,49
+Santa Fe,La Capital,851,3449
+Mendoza,Santa Rosa,012,382
+CABA,Comuna 1,642,23097
+Buenos Aires,Adolfo Gonzales Chaves,101,110
+La Rioja,General Lamadrid,103,4
+Misiones,25 de Mayo,161,115
+Chaco,General Güemes,851,244
+La Rioja,General Felipe Varela,551,32
+Buenos Aires,San Cayetano,011,118
+Buenos Aires,Patagones,471,204
+Catamarca,Paclín,016,18
+Corrientes,Capital,410,1431
+Corrientes,Paso de los Libres,014,278
+Entre Rios,San Salvador,106,349
+Buenos Aires,Colón,131,737
+Buenos Aires,Esteban Echeverría,530,2564
+Neuquen,Lácar,551,278
+Buenos Aires,Salto,013,1004
+Cordoba,Presidente Roque Sáenz Peña,106,246
+Misiones,Guaraní,108,271
+Chaco,Libertador General San Martín,014,130
+Santa Cruz,Río Chico,260,32
+Buenos Aires,Chacabuco,013,648
+Chubut,Paso de Indios,410,21
+Formosa,Bermejo,421,71
+Rio Negro,San Antonio,524,207
+Corrientes,San Luis del Palmar,014,25
+Chaco,Fray Justo Santa María de Oro,950,15
+Misiones,Candelaria,161,173
+Neuquen,Confluencia,091,14417
+La Pampa,Atreucó,461,151
+Chubut,Futaleufú,851,211
+Santa Fe,San Lorenzo,104,3603
+Salta,Cerrillos,011,998
+Buenos Aires,Chivilcoy,851,464
+Chaco,Presidencia de la Plaza,351,498
+Formosa,Laishi,421,110
+Salta,La Caldera,422,70
+Mendoza,Tunuyán,110,1023
+Neuquen,Minas,421,47
+Santiago Del Estero,General Taboada,852,80
+Tucuman,Trancas,012,155
+Buenos Aires,Tapalqué,014,189
+Mendoza,Tupungato,012,727
+Cordoba,Minas,467,36
+Tucuman,Burruyacú,492,176
+Corrientes,Sauce,014,146
+Buenos Aires,General Alvarado,851,214
+La Rioja,Ángel Vicente Peñaloza,014,1
+Buenos Aires,Ayacucho,014,489
+Corrientes,Monte Caseros,012,471
+Santa Fe,9 de Julio,014,292
+Cordoba,Ischilín,351,116
+Mendoza,San Martín,012,1771
+San Juan,Calingasta,012,70
+Corrientes,San Martín,014,128
+Buenos Aires,Arrecifes,101,233
+Chubut,Gaiman,012,302
+Entre Rios,Gualeguay,101,1232
+Buenos Aires,Campana,241,3764
+Tucuman,Cruz Alta,016,2406
+La Pampa,Chapaleufú,471,572
+Salta,Orán,107,1342
+La Rioja,General Belgrano,852,24
+Santa Cruz,Magallanes,073,1770
+Chaco,25 de Mayo,310,71
+Entre Rios,Tala,015,96
+Buenos Aires,Tordillo,014,85
+Buenos Aires,La Costa,851,309
+Buenos Aires,Las Flores,014,282
+Salta,Cafayate,110,686
+Corrientes,Mercedes,014,726
+Chaco,Comandante Fernández,851,268
+Buenos Aires,General Lavalle,471,132
+Santiago Del Estero,Avellaneda,013,51
+CABA,Comuna 8,801,2590
+Santa Fe,Belgrano,282,2169
+Cordoba,Cruz del Eje,492,376
+Buenos Aires,Alberti,011,191
+Chaco,General Belgrano,022,127
+Catamarca,Capital,851,1675
+San Juan,Rivadavia,853,846
+San Luis,Libertador General San Martín,240,28
+Santa Cruz,Lago Buenos Aires,073,1411
+Chaco,9 de Julio,011,141
+Buenos Aires,Bragado,243,697
+Cordoba,Juárez Celman,104,1325
+Salta,Rosario de Lerma,011,989
+Neuquen,Zapala,410,206
+La Rioja,General Ortiz de Ocampo,421,18
+Cordoba,Pocho,475,6
+Santiago Del Estero,Choya,492,156
+Buenos Aires,Bolívar,014,336
+Catamarca,Santa Rosa,011,133
+Chaco,Almirante Brown,022,271
+La Pampa,Conhelo,014,118
+Formosa,Formosa,410,2815
+Santiago Del Estero,Figueroa,012,20
+Neuquen,Catán Lil,014,19
+Chubut,Mártires,351,27
+Santiago Del Estero,Ojo de Agua,471,44
+Jujuy,Yavi,492,47
+Rio Negro,Ñorquinco,360,12
+Tucuman,Simoca,016,415
+Jujuy,Rinconada,073,790
+Entre Rios,Federación,012,888
+Mendoza,General Alvear,851,194
+San Juan,9 de Julio,293,298
+Buenos Aires,Capitán Sarmiento,101,1150
+Salta,Rivadavia,410,39
+Buenos Aires,General Alvear,014,148
+La Rioja,Vinchina,421,127
+Cordoba,General Roca,014,511
+Corrientes,Itatí,473,41
+Salta,Molinos,429,203
+Buenos Aires,Lanús,851,3390
+La Rioja,Chamical,852,66
+Mendoza,Junín,012,743
+Salta,La Viña,011,68
+Buenos Aires,La Matanza,851,7919
+Santa Cruz,Corpen Aike,429,1709
+Santiago Del Estero,Pellegrini,016,75
+Formosa,Pilagás,104,73
+Chubut,Escalante,091,9878
+Chaco,San Fernando,822,5798
+Rio Negro,Adolfo Alsina,360,653
+Neuquen,Chos Malal,471,81
+Mendoza,San Carlos,012,541
+Corrientes,Empedrado,471,39
+La Rioja,Capital,131,1669
+Mendoza,Malargüe,091,544
+CABA,Comuna 14,950,5118
+Jujuy,San Antonio,011,48
+Catamarca,Ambato,152,55
+Jujuy,San Pedro,107,615
+San Luis,Belgrano,239,141
+Chubut,Tehuelches,014,143
+Tucuman,Tafí Viejo,016,1146
+Buenos Aires,Junín,861,634
+Chaco,Chacabuco,011,340
+Tucuman,Famaillá,131,857
+Buenos Aires,General Rodríguez,105,1987
+Corrientes,Santo Tomé,108,1027
+Buenos Aires,Villarino,014,273
+Buenos Aires,Lobería,011,259
+Buenos Aires,Presidente Perón,491,619
+Formosa,Ramón Lista,472,1
+Tucuman,La Cocha,016,169
+Buenos Aires,Monte Hermoso,410,126
+Buenos Aires,San Nicolás,851,1419
+Tierra Del Fuego,Río Grande,264,2063
+La Rioja,San Blas de Los Sauces,852,34
+Santiago Del Estero,Mitre,011,4
+Mendoza,Guaymallén,851,1405
+Buenos Aires,General San Martín,851,3243
+Chaco,General Donovan,201,314
+Misiones,San Pedro,410,65
+Buenos Aires,Pinamar,551,288
+Corrientes,Curuzú Cuatiá,014,650
+Buenos Aires,Pergamino,013,702
+Corrientes,Bella Vista,131,486
+Chaco,2 de Abril,011,106
+La Rioja,General San Martín,475,3
+Buenos Aires,Tandil,851,928
+Tucuman,Río Chico,152,883
+Neuquen,Aluminé,852,31
+San Juan,Caucete,012,389
+Buenos Aires,Florentino Ameghino,014,128
+Buenos Aires,General Guido,014,112
+Tucuman,Tafí del Valle,016,90
+Salta,La Poma,562,9
+Entre Rios,Colón,101,2493
+Buenos Aires,Cañuelas,106,731
+Buenos Aires,Chascomús,014,258
+CABA,Comuna 5,861,3837
+Chaco,Mayor Luis J. Fontana,012,326
+Rio Negro,25 de Mayo,081,80
+San Juan,Angaco,851,90
+Catamarca,Pomán,011,266
+Salta,Metán,016,2092
+Santa Fe,Rosario,410,7698
+Entre Rios,Nogoyá,851,283
+Buenos Aires,Brandsen,151,594
+La Rioja,General Juan Facundo Quiroga,014,1
+Buenos Aires,Almirante Brown,851,3351
+Neuquen,Huiliches,410,135
+CABA,Comuna 15,410,2095
+Buenos Aires,Hurlingham,801,1311
+Buenos Aires,San Antonio de Areco,949,204
+Buenos Aires,General La Madrid,014,262
+Santiago Del Estero,Belgrano,011,162
+CABA,Comuna 11,410,2459
+Salta,Chicoana,011,1137
+Buenos Aires,Tornquist,170,180
+Buenos Aires,General Belgrano,852,132
+Misiones,Cainguás,013,1081
+Santa Cruz,Güer Aike,051,1917
+La Pampa,Curacó,110,53
+Salta,Rosario de la Frontera,421,289
+San Juan,Ullum,099,5
+Buenos Aires,Carmen de Areco,101,230
+Santiago Del Estero,Alberdi,014,125
+Santiago Del Estero,Banda,421,788
+Buenos Aires,General Juan Madariaga,471,173
+Chubut,Florentino Ameghino,081,37
+Buenos Aires,Tigre,291,6185
+Buenos Aires,Dolores,014,188
+Buenos Aires,Ezeiza,511,2509
+Buenos Aires,General Villegas,011,452
+Santiago Del Estero,Jiménez,014,48
+Buenos Aires,General Pueyrredón,851,4589
+Buenos Aires,San Pedro,170,496
+Catamarca,Valle Viejo,429,485
+Buenos Aires,Ensenada,301,2710
+San Juan,Rawson,410,1170
+San Juan,Zonda,429,861
+Buenos Aires,Rojas,202,570
+Buenos Aires,Monte,101,742
+Misiones,General Manuel Belgrano,013,647
+Salta,General José de San Martín,410,858
+Buenos Aires,Lincoln,014,437
+Buenos Aires,Mercedes,101,877
+Cordoba,Tulumba,016,70
+Chaco,Tapenagá,014,120
+Entre Rios,Islas del Ibicuy,429,180
+Chaco,Bermejo,421,144
+CABA,Comuna 7,851,2146
+Santa Fe,San Javier,851,205
+Chaco,1° de Mayo,473,25
+Catamarca,Fray Mamerto Esquiú,101,30
+Cordoba,San Alberto,011,173
+Santa Fe,San Martín,101,862
+Buenos Aires,25 de Mayo,014,323
+Mendoza,Godoy Cruz,851,1521
+Salta,Los Andes,090,937
+La Pampa,Utracán,014,152
+Misiones,Oberá,108,1032
+Buenos Aires,Exaltación de la Cruz,240,195
+Buenos Aires,Saavedra,014,124
+Rio Negro,Bariloche,551,1159
+Salta,Iruya,103,5
+Jujuy,Palpalá,492,279
+Salta,Guachipas,011,81
+Buenos Aires,Morón,851,3562
+Misiones,Iguazú,551,1098
+Santiago Del Estero,San Martín,851,25
+Neuquen,Pehuenches,091,2048
+Santa Cruz,Lago Argentino,429,978
+Jujuy,Santa Bárbara,012,210
+Entre Rios,Villaguay,014,250
+Cordoba,Colón,851,1335
+Entre Rios,La Paz,830,401
+Jujuy,Ledesma,107,5679
+CABA,Comuna 10,801,3588
+La Rioja,General Lamadrid,012,4
+Cordoba,General San Martín,851,1118
+Misiones,Montecarlo,161,511
+Buenos Aires,Pila,011,39
+Tucuman,Lules,011,923
+La Pampa,Loventué,014,128
+Corrientes,General Paz,429,125
+Buenos Aires,Pilar,851,3950
+Entre Rios,Federal,014,276
+Chaco,12 de Octubre,131,210
+Entre Rios,Victoria,851,256
+CABA,Comuna 3,801,4863
+Cordoba,Río Segundo,275,1388
+San Juan,San Martín,110,398
+Santa Fe,Constitución,241,2038
+Misiones,San Javier,492,158
+Chubut,Rawson,102,1004
+Entre Rios,Concordia,012,1024
+Rio Negro,Valcheta,091,75
+La Pampa,Catriló,461,181
+La Pampa,Maracó,351,274
+Salta,General Güemes,011,762
+Catamarca,Santa María,110,186
+Chaco,San Lorenzo,022,42
+Chubut,Río Senguer,014,131
+Chubut,Sarmiento,091,501
+Jujuy,Dr. Manuel Belgrano,851,1036
+Buenos Aires,Leandro N. Alem,011,134
+Buenos Aires,Berazategui,851,2488
+Santiago Del Estero,Guasayán,081,38
+La Pampa,Puelén,431,466
+Chubut,Languiñeo,014,10
+Buenos Aires,Florencio Varela,851,2151
+La Rioja,Famatina,152,93
+Salta,Santa Victoria,351,2
+Mendoza,Capital,801,2217
+Buenos Aires,Coronel Pringles,014,208
+Cordoba,Punilla,851,1401
+Chubut,Telsen,351,21
+Chaco,Maipú,022,110
+Rio Negro,General Roca,012,12255
+Jujuy,Cochinoca,429,1155
+CABA,Comuna 13,851,4978
+Entre Rios,Gualeguaychú,852,571
+Buenos Aires,Lobos,105,175
+Buenos Aires,Ituzaingó,851,1379
+Cordoba,Capital,822,9194
+Buenos Aires,Magdalena,151,449
+Buenos Aires,Carlos Tejedor,014,144
+La Pampa,Toay,431,99
+San Juan,Pocito,210,682
+Buenos Aires,Lomas de Zamora,851,6807
+Mendoza,La Paz,421,41
+Buenos Aires,General Viamonte,011,131
+La Pampa,Chalileo,014,11
+Buenos Aires,Pehuajó,014,229
+Santa Fe,Las Colonias,105,899
+Chubut,Cushamen,011,151
+La Pampa,Chical Co,422,5
+Santa Fe,General López,011,1224
+Santiago Del Estero,Loreto,852,63
+La Pampa,Lihuel Calel,014,19
+San Luis,Gobernador Dupuy,014,311
+San Luis,Junín,139,206
+La Rioja,Chilecito,011,767
+La Rioja,Rosario Vera Peñaloza,015,39
+Neuquen,Los Lagos,551,235
+Buenos Aires,Coronel Suárez,152,380
+Cordoba,Calamuchita,351,595
+Jujuy,El Carmen,011,4062
+Buenos Aires,General Las Heras,108,223
+CABA,Comuna 9,101,2308
+Buenos Aires,San Miguel,851,2494
+Buenos Aires,Escobar,851,2548
+Chaco,Libertad,131,434
+Santa Fe,San Jerónimo,271,520
+Rio Negro,Pilcaniyeu,014,38
+Buenos Aires,San Vicente,101,588
+Catamarca,Capayán,429,516
+San Juan,Iglesia,073,1421
+Salta,Capital,410,2956
+Corrientes,General Alvear,014,85
+Buenos Aires,Balcarce,103,836
+Tucuman,Leales,107,802
+Misiones,Apóstoles,108,1513
+Jujuy,Susques,089,532
+Corrientes,San Miguel,024,62
+Santiago Del Estero,Atamisqui,852,26
+Cordoba,Unión,282,1114
+Misiones,Eldorado,161,1040
+Santiago Del Estero,Rivadavia,014,49
+Buenos Aires,San Isidro,801,4785
+Corrientes,Ituzaingó,013,443
+Santa Fe,General Obligado,101,1215
+Jujuy,Tumbaya,239,133
+La Rioja,Castro Barros,110,204
+Buenos Aires,General Arenales,461,250
+Buenos Aires,Bahía Blanca,492,1456
+Buenos Aires,La Plata,851,6438
+Buenos Aires,Moreno,851,2810
+Neuquen,Collón Curá,492,114
+Santa Fe,Iriondo,310,562
+Buenos Aires,Castelli,014,134
+CABA,Comuna 4,530,13036
+Rio Negro,Pichi Mahuida,852,84
+Buenos Aires,Roque Pérez,101,212
+La Pampa,Rancul,014,191
+Cordoba,San Javier,351,323
+Corrientes,Esquina,461,494
+Tucuman,Chicligasta,110,627
+Santa Cruz,Deseado,091,4750
+Entre Rios,Paraná,851,1957
+Catamarca,La Paz,107,638
+Jujuy,Tilcara,551,61
+San Luis,Ayacucho,012,115
+Catamarca,Ancasti,801,20
+Santiago Del Estero,Juan Felipe Ibarra,014,30
+Buenos Aires,Tres Arroyos,011,510
+Buenos Aires,Punta Indio,014,79
+Santa Fe,Castellanos,293,2248
