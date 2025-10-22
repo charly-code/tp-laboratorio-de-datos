@@ -14,7 +14,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
-# Obtener la ruta actual
+# para obtener la ruta actual
 ruta = os.getcwd()
 
 #%% 
@@ -834,79 +834,104 @@ plt.show()
 """
 iv) Relación entre la cantidad de empleados cada mil habitantes (para 2022) y
 de EE cada mil habitantes por departamento.
+
 """ 
-cant_ee_por_depto = {}
-for v in dict_provincias.values():
-    cant_ee_por_depto.update(v)
+# paso a mayusculas todo para que no haya incompatibilidad en el futuro si quiero hacer algun merge
+ESTABLECIMIENTOS_PRODUCTIVOS['provincia']= ESTABLECIMIENTOS_PRODUCTIVOS['provincia'].str.strip().str.upper()
+ESTABLECIMIENTOS_PRODUCTIVOS['departamento']= ESTABLECIMIENTOS_PRODUCTIVOS['departamento'].str.strip().str.upper()
+provincias = EE_comun['Jurisdicción'].unique()
 
-cant_empleados_por_depto = ESTABLECIMIENTOS_PRODUCTIVOS.groupby('departamento')['Empleo'].sum().sort_values(ascending=True)
-cant_empleados_df = cant_empleados_por_depto.reset_index()
+dict_provincias_ep = {}
+# aca tengo que tener cuidado que hay departamentos que aparecen en varias provincias como 25 de MAYO
+# asi que agrupo los provincia y ahi por localidad asi las cuento por separado 
+for provincia in provincias:
+    df_provincia = ESTABLECIMIENTOS_PRODUCTIVOS[ESTABLECIMIENTOS_PRODUCTIVOS['provincia'] == provincia]
+    
+    conteo_localidades = df_provincia['departamento'].value_counts().to_dict()
+    
+    dict_provincias_ep[provincia] = conteo_localidades
 
-cant_empleados_df['departamento'] = cant_empleados_df['departamento'].str.strip().str.upper()
-# notamos los mismas dificultades que tuvimos con los nombres sobre los acentos 
-for vocal_con_acento, vocal_sin_acento in acentos.items():
-   cant_empleados_df['departamento'] = cant_empleados_df['departamento'].str.replace(vocal_con_acento, vocal_sin_acento, regex=False)
+#%%
+CENSO_POR_NIVEL_EDUC_aux = CENSO_POR_NIVEL_EDUC[['departamento','provincia','total poblacion']]
+provincias = CENSO_POR_NIVEL_EDUC_aux['provincia'].unique()
 
-cant_e_por_depto = dict(zip(cant_empleados_df['departamento'], cant_empleados_df['Empleo']))
+dict_provincias_censo = {}
+# aca tengo que tener cuidado que hay departamentos que aparecen en varias provincias como 25 de MAYO
+# asi que agrupo los provincia y ahi por localidad asi las cuento por separado 
+for provincia in provincias:
+    df_provincia = CENSO_POR_NIVEL_EDUC_aux[CENSO_POR_NIVEL_EDUC_aux['provincia'] == provincia]
+    
+    conteo = df_provincia.groupby('departamento')['total poblacion'].sum().to_dict()
 
-total_por_depto = dict(zip(CENSO_POR_NIVEL_EDUC['departamento'], CENSO_POR_NIVEL_EDUC['total poblacion']))
+    dict_provincias_censo[provincia] = conteo
 
 
-claves_comunes = set(cant_ee_por_depto.keys()) & set(total_por_depto.keys()) & set(cant_e_por_depto.keys())
+#%%
+claves_comunes = set(dict_provincias_ep.keys()) & set(dict_provincias.keys()) & set(dict_provincias_censo.keys())
 
 diccionario_combinado = {}
+# junto por provincia los estableciminetos educativos, los productivos y la poblacion total
 for clave in claves_comunes:
     diccionario_combinado[clave] = {
-        'empleo': cant_e_por_depto[clave],
-        'poblacion': total_por_depto[clave],
-        'ee': cant_ee_por_depto.get(clave) 
+        'empleo': dict_provincias_ep[clave],
+        'poblacion': dict_provincias_censo[clave],
+        'ee': dict_provincias.get(clave)
     }
+#%%
+#realizo el calculo para cada departamento cada 1000 habitantes
+diccionario_combinado = {}
 
-for clave in diccionario_combinado:
-    empleo = diccionario_combinado[clave]['empleo']
-    poblacion = diccionario_combinado[clave]['poblacion']
-    ee = diccionario_combinado[clave]['ee']
-    
-    if poblacion and poblacion != 0:
-        diccionario_combinado[clave]['empleo_por_mil'] = (1000 * empleo) / poblacion
-        diccionario_combinado[clave]['ee_por_mil'] = (1000 * ee) / poblacion
-    else:
-        diccionario_combinado[clave]['empleo_por_mil'] = 0
-        diccionario_combinado[clave]['ee_por_mil'] = 0
-   
-diccionario_combinado_df = pd.DataFrame.from_dict(diccionario_combinado)
+for provincia in claves_comunes:
+    empleo_prov = dict_provincias_ep.get(provincia, {})
+    poblacion_prov = dict_provincias_censo.get(provincia, {})
+    ee_prov = dict_provincias.get(provincia, {})
 
-departamentos = diccionario_combinado_df.columns.tolist()
-empleo_por_mil = diccionario_combinado_df.iloc[3].tolist()
-ee_por_mil = diccionario_combinado_df.iloc[4].tolist()
+    diccionario_combinado[provincia] = {}
 
-# Creamos DataFrame correctamente
-diccionario_combinado_df2 = pd.DataFrame({
-    'departamento': departamentos,
-    'empleo_por_mil': empleo_por_mil,
-    'ee_por_mil': ee_por_mil
-})
-diccionario_combinado_df2['empleo_por_mil']=diccionario_combinado_df2['empleo_por_mil'].astype(int)
-# saco la fila de GENERAL SAN MARTIN porque me dio 20000 empleos por 1000 habitantes y es una relacion muy alejada de lo comun(outlier)
+    for depto in poblacion_prov.keys():
+        empleo = empleo_prov.get(depto, 0)
+        poblacion = poblacion_prov.get(depto, 0)
+        ee = ee_prov.get(depto, 0)
 
-diccionario_combinado_df2 = diccionario_combinado_df2[diccionario_combinado_df2['departamento'] != 'GENERAL SAN MARTIN']
+        if poblacion > 0:
+            empleo_por_mil = (1000 * empleo) / poblacion
+            ee_por_mil = (1000 * ee) / poblacion
+        else:
+            empleo_por_mil = ee_por_mil = 0
+
+        diccionario_combinado[provincia][depto] = {
+            'empleo': empleo,
+            'poblacion': poblacion,
+            'ee': ee,
+            'empleo_por_mil': empleo_por_mil,
+            'ee_por_mil': ee_por_mil
+        }
+#%%
+empleo_por_mil = []
+ee_por_mil = []
+
+for provincia in diccionario_combinado.values():
+    for depto_data in provincia.values():
+        empleo_por_mil.append(depto_data['empleo_por_mil'])
+        ee_por_mil.append(depto_data['ee_por_mil'])
+
 #%%#  
-#generamos el grafico
+#generamos el grafico comparativo 
 plt.figure(figsize=(10,10))
 # queriamos generar un color diferente para cada localidad asi se puede analizar mejor el graico
-colores = np.random.rand(len(diccionario_combinado_df2))
+colores = np.random.rand(len(empleo_por_mil))
 
 plt.scatter(
-    diccionario_combinado_df2['ee_por_mil'],
-    diccionario_combinado_df2['empleo_por_mil'],
+    empleo_por_mil,
+    ee_por_mil,
     c=colores,
     cmap='rainbow',    
     alpha=0.7
 )
 
 plt.title('Relación entre empleo y cantidad de EE por cada mil habitantes',fontsize=14)
-plt.xlabel('EE por cada mil habitantes',fontsize=14)
-plt.ylabel('Empleados por cada mil habitantes',fontsize=14)
+plt.ylabel('EE por cada mil habitantes',fontsize=14)
+plt.xlabel('Empleados por cada mil habitantes',fontsize=14)
 plt.grid(True, linestyle='--', alpha=0.5)
 plt.show()
 
