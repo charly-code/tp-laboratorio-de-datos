@@ -1,9 +1,6 @@
 """
 Autores: 
-    
-    Levigurevitz, Nicolas 1245/23 elevege02@gmail.com
-    Parajo Lopez, Juan Manuel 1367/24 juancholinus@gmail.com
-    Guanca, Carla Anabella 1928/21 carguanca@gmail.com
+
 
 """
 # Importamos bibliotecas que vamos a utiliza 
